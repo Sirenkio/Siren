@@ -2,10 +2,39 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>主人与小猫的日程管理</title>
+    html
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">    <title>主人与小猫的日程管理</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <style>
+    <style>css
+@media (max-width: 768px) {
+    /* 移动端导航样式优化 */
+    nav {
+        flex-wrap: wrap;
+    }
+    .view-btn {
+        padding: 10px;
+        flex: 1;
+        text-align: center;
+    }
+    
+    /* 确保可点击区域足够大 */
+    button, .day-cell, .task-item, .rule-item, .reward-item, .event-item {
+        min-height: 44px;
+    }
+    
+    /* 移动端日历优化 */
+    #calendarDays .day-cell {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* 使导航按钮在移动端更明显 */
+    .view-btn.active, .view-btn[class*="border-purple-500"] {
+        border-bottom-width: 3px !important;
+    }
+}
         .task-item {
             transition: all 0.3s ease;
         }
@@ -96,7 +125,7 @@
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <h1 class="text-2xl font-bold">主人与小猫的日程管理</h1>
-                <div 
+                <div 
                     id="userToggle"
                     class="cursor-pointer text-sm bg-purple-700 hover:bg-purple-800 px-3 py-1 rounded-full flex items-center"
                 >
@@ -106,9 +135,9 @@
                     当前身份: <span id="currentRole">小猫</span>
                 </div>
             </div>
-            
+            
             <div class="relative">
-                <button 
+                <button 
                     id="messageToggle"
                     class="p-2 bg-purple-700 rounded-full hover:bg-purple-800 relative"
                 >
@@ -117,25 +146,25 @@
                     </svg>
                     <span id="unreadBadge" class="absolute top-0 right-0 bg-red-500 w-3 h-3 rounded-full hidden"></span>
                 </button>
-                
+                
                 <div id="messagePanel" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-10 hidden">
                     <div class="p-3 border-b border-gray-200">
                         <h3 class="font-medium">消息</h3>
                     </div>
-                    
+                    
                     <div id="messageList" class="max-h-96 overflow-y-auto p-3 space-y-3">
                         <!-- Messages will be added here -->
                     </div>
-                    
+                    
                     <div class="p-3 border-t border-gray-200">
                         <div class="flex">
-                            <input 
+                            <input 
                                 id="newMessageInput"
                                 type="text"
                                 class="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                                 placeholder="输入消息..."
                             />
-                            <button 
+                            <button 
                                 id="sendMessageBtn"
                                 class="bg-purple-600 text-white px-4 py-2 rounded-r-lg hover:bg-purple-700"
                             >
@@ -147,11 +176,11 @@
             </div>
         </div>
     </header>
-    
+    
     <main class="max-w-6xl mx-auto py-6 px-4">
         <!-- 导航 -->
         <nav class="flex border-b border-gray-200 mb-6">
-            <button 
+            <button 
                 data-view="calendar"
                 class="view-btn px-4 py-2 font-medium border-b-2 border-purple-500 text-purple-600"
             >
@@ -162,8 +191,8 @@
                     日程
                 </div>
             </button>
-            
-            <button 
+            
+            <button 
                 data-view="tasks"
                 class="view-btn px-4 py-2 font-medium border-b-2 border-transparent hover:border-gray-300"
             >
@@ -174,8 +203,8 @@
                     任务
                 </div>
             </button>
-            
-            <button 
+            
+            <button 
                 data-view="rules"
                 class="view-btn px-4 py-2 font-medium border-b-2 border-transparent hover:border-gray-300"
             >
@@ -186,8 +215,8 @@
                     规则
                 </div>
             </button>
-            
-            <button 
+            
+            <button 
                 data-view="rewards"
                 class="view-btn px-4 py-2 font-medium border-b-2 border-transparent hover:border-gray-300"
             >
@@ -199,13 +228,13 @@
                 </div>
             </button>
         </nav>
-        
+        
         <!-- 视图内容 -->
         <div id="viewContainer">
             <!-- Calendar View -->
             <div id="calendarView" class="view-content">
                 <div class="flex justify-between items-center mb-4">
-                    <button 
+                    <button 
                         id="prevMonthBtn"
                         class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
                     >
@@ -214,14 +243,14 @@
                     <h2 id="currentMonth" class="text-xl font-semibold">
                         2023年4月
                     </h2>
-                    <button 
+                    <button 
                         id="nextMonthBtn"
                         class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
                     >
                         下个月
                     </button>
                 </div>
-                
+                
                 <div class="grid grid-cols-7 gap-2 text-center font-medium mb-2">
                     <div>日</div>
                     <div>一</div>
@@ -231,11 +260,11 @@
                     <div>五</div>
                     <div>六</div>
                 </div>
-                
+                
                 <div id="calendarDays" class="grid grid-cols-7 gap-2">
                     <!-- Calendar days will be added here -->
                 </div>
-                
+                
                 <div class="mt-6">
                     <h3 id="selectedDate" class="text-lg font-semibold mb-3">
                         2023年4月1日 的日程
@@ -243,9 +272,9 @@
                     <div id="eventsForDay" class="space-y-2">
                         <!-- Events for selected day will be added here -->
                     </div>
-                    
+                    
                     <div class="mt-4">
-                        <button 
+                        <button 
                             id="addEventBtn"
                             class="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
                         >
@@ -257,11 +286,11 @@
                     </div>
                 </div>
             </div>
-            
+            
             <!-- Tasks View -->
             <div id="tasksView" class="view-content hidden">
                 <h2 class="text-xl font-semibold mb-4">任务列表</h2>
-                
+                
                 <div class="mb-6">
                     <h3 class="text-lg font-medium mb-3 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -269,12 +298,12 @@
                         </svg>
                         待完成任务 (<span id="pendingTaskCount">0</span>)
                     </h3>
-                    
+                    
                     <div id="pendingTasks" class="space-y-3">
                         <!-- Pending tasks will be added here -->
                     </div>
                 </div>
-                
+                
                 <div>
                     <h3 class="text-lg font-medium mb-3 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -282,14 +311,14 @@
                         </svg>
                         已完成任务 (<span id="completedTaskCount">0</span>)
                     </h3>
-                    
+                    
                     <div id="completedTasks" class="space-y-3">
                         <!-- Completed tasks will be added here -->
                     </div>
                 </div>
-                
+                
                 <div class="mt-4">
-                    <button 
+                    <button 
                         id="addTaskBtn"
                         class="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
                     >
@@ -300,17 +329,17 @@
                     </button>
                 </div>
             </div>
-            
+            
             <!-- Rules View -->
             <div id="rulesView" class="view-content hidden">
                 <h2 class="text-xl font-semibold mb-4">规则与期望</h2>
-                
+                
                 <div id="rulesList" class="space-y-3">
                     <!-- Rules will be added here -->
                 </div>
-                
+                
                 <div id="masterOnlyRuleBtn" class="mt-4 hidden">
-                    <button 
+                    <button 
                         id="addRuleBtn"
                         class="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
                     >
@@ -321,7 +350,7 @@
                     </button>
                 </div>
             </div>
-            
+            
             <!-- Rewards View -->
             <div id="rewardsView" class="view-content hidden">
                 <div class="flex justify-between items-center mb-4">
@@ -333,13 +362,13 @@
                         <span id="pointsDisplay">0</span> 积分
                     </div>
                 </div>
-                
+                
                 <div id="rewardsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Rewards will be added here -->
                 </div>
-                
+                
                 <div id="masterOnlyRewardBtn" class="mt-4 hidden">
-                    <button 
+                    <button 
                         id="addRewardBtn"
                         class="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
                     >
@@ -352,7 +381,7 @@
             </div>
         </div>
     </main>
-    
+    
     <!-- Task Details Modal -->
     <div id="taskDetailsModal" class="modal">
         <div class="modal-content">
@@ -364,11 +393,11 @@
                     </svg>
                 </button>
             </div>
-            
+            
             <div class="mb-4">
                 <p id="taskDetailsDescription" class="text-gray-700">任务描述</p>
             </div>
-            
+            
             <div class="space-y-2 mb-4">
                 <div class="flex justify-between">
                     <span class="text-gray-600">类别:</span>
@@ -376,29 +405,29 @@
                         类别
                     </span>
                 </div>
-                
+                
                 <div class="flex justify-between">
                     <span class="text-gray-600">优先级:</span>
                     <span id="taskDetailsPriority" class="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-800">
                         中
                     </span>
                 </div>
-                
+                
                 <div class="flex justify-between">
                     <span class="text-gray-600">设定者:</span>
                     <span id="taskDetailsSetter">主人</span>
                 </div>
-                
+                
                 <div class="flex justify-between">
                     <span class="text-gray-600">截止时间:</span>
                     <span id="taskDetailsDeadline">2023-04-01 18:00</span>
                 </div>
-                
+                
                 <div class="flex justify-between">
                     <span class="text-gray-600">奖励积分:</span>
                     <span id="taskDetailsPoints" class="font-medium text-purple-700">10</span>
                 </div>
-                
+                
                 <div class="flex justify-between">
                     <span class="text-gray-600">状态:</span>
                     <span id="taskDetailsStatus" class="text-yellow-600">
@@ -406,18 +435,18 @@
                     </span>
                 </div>
             </div>
-            
+            
             <div class="flex justify-end space-x-3">
                 <div id="kittenTaskActions" class="hidden">
-                    <button 
+                    <button 
                         id="completeTaskBtn"
                         class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                     >
                         标记为已完成
                     </button>
                 </div>
-                
-                <button 
+                
+                <button 
                     class="modal-close px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400"
                 >
                     关闭
@@ -425,7 +454,7 @@
             </div>
         </div>
     </div>
-    
+    
     <!-- Rule Details Modal -->
     <div id="ruleDetailsModal" class="modal">
         <div class="modal-content">
@@ -437,11 +466,11 @@
                     </svg>
                 </button>
             </div>
-            
+            
             <div class="mb-4">
                 <p id="ruleDetailsDescription" class="text-gray-700">规则描述</p>
             </div>
-            
+            
             <div class="space-y-2 mb-4">
                 <div class="flex justify-between">
                     <span class="text-gray-600">类别:</span>
@@ -449,14 +478,14 @@
                         类别
                     </span>
                 </div>
-                
+                
                 <div class="flex justify-between">
                     <span class="text-gray-600">重要性:</span>
                     <span id="ruleDetailsImportance" class="text-xs px-2 py-1 rounded bg-red-100 text-red-800">
                         必要
                     </span>
                 </div>
-                
+                
                 <div class="mt-2">
                     <span class="text-gray-600">违反后果:</span>
                     <p id="ruleDetailsConsequence" class="mt-1 text-gray-700 p-2 bg-gray-50 rounded">
@@ -464,9 +493,9 @@
                     </p>
                 </div>
             </div>
-            
+            
             <div class="flex justify-end">
-                <button 
+                <button 
                     class="modal-close px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400"
                 >
                     关闭
@@ -474,7 +503,7 @@
             </div>
         </div>
     </div>
-    
+    
     <!-- Add Item Modal -->
     <div id="addItemModal" class="modal">
         <div class="modal-content">
@@ -486,51 +515,51 @@
                     </svg>
                 </button>
             </div>
-            
+            
             <div class="space-y-4 mb-4">
                 <!-- 通用字段：标题和描述 -->
                 <div>
                     <label class="block text-gray-700 mb-1">标题</label>
-                    <input 
+                    <input 
                         id="newItemTitle"
                         type="text"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                 </div>
-                
+                
                 <div>
                     <label class="block text-gray-700 mb-1">描述</label>
-                    <textarea 
+                    <textarea 
                         id="newItemDescription"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                         rows="3"
                     ></textarea>
                 </div>
-                
+                
                 <!-- 日程特有字段 -->
                 <div id="eventFields" class="hidden">
                     <label class="block text-gray-700 mb-1">日期和时间</label>
-                    <input 
+                    <input 
                         id="newEventDateTime"
                         type="datetime-local"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                 </div>
-                
+                
                 <!-- 任务特有字段 -->
                 <div id="taskFields" class="hidden">
                     <div>
                         <label class="block text-gray-700 mb-1">截止日期</label>
-                        <input 
+                        <input 
                             id="newTaskDeadline"
                             type="datetime-local"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
                     </div>
-                    
+                    
                     <div class="mt-4">
                         <label class="block text-gray-700 mb-1">优先级</label>
-                        <select 
+                        <select 
                             id="newTaskPriority"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                         >
@@ -539,10 +568,10 @@
                             <option value="low">低</option>
                         </select>
                     </div>
-                    
+                    
                     <div class="mt-4">
                         <label class="block text-gray-700 mb-1">奖励积分</label>
-                        <input 
+                        <input 
                             id="newTaskPoints"
                             type="number"
                             value="5"
@@ -550,12 +579,12 @@
                         />
                     </div>
                 </div>
-                
+                
                 <!-- 规则特有字段 -->
                 <div id="ruleFields" class="hidden">
                     <div>
                         <label class="block text-gray-700 mb-1">重要性</label>
-                        <select 
+                        <select 
                             id="newRuleImportance"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                         >
@@ -564,22 +593,22 @@
                             <option value="standard" selected>标准</option>
                         </select>
                     </div>
-                    
+                    
                     <div class="mt-4">
                         <label class="block text-gray-700 mb-1">违反后果</label>
-                        <textarea 
+                        <textarea 
                             id="newRuleConsequence"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                             rows="2"
                         ></textarea>
                     </div>
                 </div>
-                
+                
                 <!-- 奖励特有字段 -->
                 <div id="rewardFields" class="hidden">
                     <div>
                         <label class="block text-gray-700 mb-1">所需积分</label>
-                        <input 
+                        <input 
                             id="newRewardCost"
                             type="number"
                             value="50"
@@ -587,11 +616,11 @@
                         />
                     </div>
                 </div>
-                
+                
                 <!-- 通用字段：类别 -->
                 <div>
                     <label class="block text-gray-700 mb-1">类别</label>
-                    <select 
+                    <select 
                         id="newItemCategory"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
@@ -610,15 +639,15 @@
                     </select>
                 </div>
             </div>
-            
+            
             <div class="flex justify-end space-x-3">
-                <button 
+                <button 
                     class="modal-close px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400"
                 >
                     取消
                 </button>
-                
-                <button 
+                
+                <button 
                     id="addItemBtn"
                     class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
                 >
@@ -635,13 +664,13 @@
         let currentView = 'calendar';
         let currentDate = new Date();
         let selectedDate = new Date();
-        
+        
         // 日程数据
         let events = [
-            { 
-                id: 1, 
-                title: '早晨汇报', 
-                date: new Date(new Date().setHours(8, 0, 0, 0)), 
+            { 
+                id: 1, 
+                title: '早晨汇报', 
+                date: new Date(new Date().setHours(8, 0, 0, 0)), 
                 description: '向主人汇报昨晚的睡眠情况和今天的感受',
                 status: 'pending',
                 category: 'routine',
@@ -649,10 +678,10 @@
                 feedback: '',
                 approved: false
             },
-            { 
-                id: 2, 
-                title: '完成工作任务', 
-                date: new Date(new Date().setHours(14, 0, 0, 0)), 
+            { 
+                id: 2, 
+                title: '完成工作任务', 
+                date: new Date(new Date().setHours(14, 0, 0, 0)), 
                 description: '按时完成所有工作相关任务',
                 status: 'pending',
                 category: 'work',
@@ -660,10 +689,10 @@
                 feedback: '',
                 approved: false
             },
-            { 
-                id: 3, 
-                title: '运动时间', 
-                date: new Date(new Date().setHours(17, 30, 0, 0)), 
+            { 
+                id: 3, 
+                title: '运动时间', 
+                date: new Date(new Date().setHours(17, 30, 0, 0)), 
                 description: '至少30分钟的有氧运动',
                 status: 'pending',
                 category: 'health',
@@ -671,10 +700,10 @@
                 feedback: '',
                 approved: false
             },
-            { 
-                id: 4, 
-                title: '晚间总结', 
-                date: new Date(new Date().setHours(21, 0, 0, 0)), 
+            { 
+                id: 4, 
+                title: '晚间总结', 
+                date: new Date(new Date().setHours(21, 0, 0, 0)), 
                 description: '向主人汇报今天的完成情况和情绪状态',
                 status: 'pending',
                 category: 'routine',
@@ -683,7 +712,7 @@
                 approved: false
             }
         ];
-        
+        
         // 任务数据
         let tasks = [
             {
@@ -720,7 +749,7 @@
                 points: 15
             }
         ];
-        
+        
         // 规则数据
         let rules = [
             {
@@ -756,7 +785,7 @@
                 consequence: '视情况由主人决定适当的惩罚措施'
             }
         ];
-        
+        
         // 奖励数据
         let rewards = [
             {
@@ -792,7 +821,7 @@
                 available: true
             }
         ];
-        
+        
         // 消息数据
         let messages = [
             {
@@ -817,12 +846,12 @@
                 read: false
             }
         ];
-        
+        
         // 当前查看的任务或规则
         let currentTaskId = null;
         let currentRuleId = null;
         let currentModalType = null;
-        
+        
         // 根据类别获取颜色
         function getCategoryColor(category) {
             switch(category) {
@@ -840,7 +869,7 @@
                 default: return 'bg-gray-100 text-gray-800';
             }
         }
-        
+        
         // 根据优先级获取样式
         function getPriorityStyle(priority) {
             switch(priority) {
@@ -850,76 +879,76 @@
                 default: return '';
             }
         }
-        
+        
         // 格式化日期
         function formatDate(date) {
             return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
         }
-        
+        
         // 格式化时间
         function formatTime(date) {
             return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
         }
-        
+        
         // 格式化日期时间
         function formatDateTime(date) {
             return `${formatDate(date)} ${formatTime(date)}`;
         }
-        
+        
         // 是否是同一天
         function isSameDay(date1, date2) {
             return date1.getFullYear() === date2.getFullYear() &&
                    date1.getMonth() === date2.getMonth() &&
                    date1.getDate() === date2.getDate();
         }
-        
+        
         // 获取当前选择日期的事件
         function getEventsForSelectedDate() {
             return events.filter(event => isSameDay(event.date, selectedDate));
         }
-        
+        
         // 渲染日历
         function renderCalendar() {
             // 更新月份显示
             document.getElementById('currentMonth').textContent = `${selectedDate.getFullYear()}年${selectedDate.getMonth() + 1}月`;
-            
+            
             // 计算日历网格
             const firstDayOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
             const lastDayOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
             const daysInMonth = lastDayOfMonth.getDate();
             const firstDayOfWeek = firstDayOfMonth.getDay(); // 0 for Sunday
-            
+            
             // 创建日历单元格
             const calendarDays = document.getElementById('calendarDays');
             calendarDays.innerHTML = '';
-            
+            
             // 添加月初前的空白单元格
             for (let i = 0; i < firstDayOfWeek; i++) {
                 const emptyCell = document.createElement('div');
                 emptyCell.className = 'p-2';
                 calendarDays.appendChild(emptyCell);
             }
-            
+            
             // 添加日期单元格
             for (let day = 1; day <= daysInMonth; day++) {
                 const date = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day);
                 const dayCell = document.createElement('div');
-                
+                
                 // 检查是否是今天
                 const isToday = isSameDay(date, new Date());
-                
+                
                 // 检查是否是选中的日期
                 const isSelected = isSameDay(date, selectedDate);
-                
+                
                 // 检查该日期是否有事件
                 const hasEvents = events.some(event => isSameDay(event.date, date));
-                
+                
                 // 设置单元格类
                 dayCell.className = `day-cell p-2 border rounded cursor-pointer transition-colors
                     ${isToday ? 'day-today' : ''}
                     ${isSelected ? 'day-selected' : 'hover:bg-purple-50'}
                     ${hasEvents ? 'day-has-events' : ''}`;
-                
+                
                 // 添加日期
                 dayCell.innerHTML = `<div class="text-center">${day}</div>`;
                 if (hasEvents) {
@@ -927,7 +956,7 @@
                     eventIndicator.className = 'w-2 h-2 bg-purple-700 rounded-full mx-auto mt-1';
                     dayCell.appendChild(eventIndicator);
                 }
-                
+                
                 // 添加点击事件
                 dayCell.addEventListener('click', () => {
                     // 移除之前选中日期的选中状态
@@ -935,43 +964,43 @@
                         cell.classList.remove('day-selected');
                         cell.classList.add('hover:bg-purple-50');
                     });
-                    
+                    
                     // 设置新的选中日期
                     dayCell.classList.add('day-selected');
                     dayCell.classList.remove('hover:bg-purple-50');
-                    
+                    
                     // 更新选中日期
                     selectedDate = date;
-                    
+                    
                     // 更新日期显示
                     document.getElementById('selectedDate').textContent = `${formatDate(selectedDate)} 的日程`;
-                    
+                    
                     // 渲染该日期的事件
                     renderEventsForDay();
                 });
-                
+                
                 calendarDays.appendChild(dayCell);
             }
-            
+            
             // 更新选中日期显示
             document.getElementById('selectedDate').textContent = `${formatDate(selectedDate)} 的日程`;
-            
+            
             // 渲染选中日期的事件
             renderEventsForDay();
         }
-        
+        
         // 渲染选中日期的事件
         function renderEventsForDay() {
             const eventsContainer = document.getElementById('eventsForDay');
             eventsContainer.innerHTML = '';
-            
+            
             const eventsForDay = getEventsForSelectedDate();
-            
+            
             if (eventsForDay.length > 0) {
                 eventsForDay.forEach(event => {
                     const eventElement = document.createElement('div');
                     eventElement.className = 'event-item p-3 bg-white rounded-lg shadow border-l-4 border-purple-500';
-                    
+                    
                     eventElement.innerHTML = `
                         <div class="flex justify-between items-start">
                             <div>
@@ -987,7 +1016,7 @@
                                     </span>
                                 </div>
                             </div>
-                            
+                            
                             ${currentUser === 'kitten' && event.setBy === 'master' && event.status === 'pending' ? `
                                 <button class="complete-event-btn text-green-600 hover:text-green-800" data-id="${event.id}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -995,7 +1024,7 @@
                                     </svg>
                                 </button>
                             ` : ''}
-                            
+                            
                             ${currentUser === 'master' ? `
                                 <div class="flex space-x-2">
                                     <button class="edit-event-btn text-blue-600 hover:text-blue-800" data-id="${event.id}">
@@ -1012,36 +1041,36 @@
                             ` : ''}
                         </div>
                     `;
-                    
+                    
                     eventsContainer.appendChild(eventElement);
                 });
             } else {
                 eventsContainer.innerHTML = '<p class="text-gray-500 italic">今天没有安排</p>';
             }
-            
+            
             // 添加事件按钮显示控制
             document.getElementById('addEventBtn').style.display = currentUser === 'kitten' ? 'none' : 'flex';
         }
-        
+        
         // 渲染任务列表
         function renderTasks() {
             const pendingTasks = tasks.filter(task => !task.completed);
             const completedTasks = tasks.filter(task => task.completed);
-            
+            
             // 更新任务计数
             document.getElementById('pendingTaskCount').textContent = pendingTasks.length;
             document.getElementById('completedTaskCount').textContent = completedTasks.length;
-            
+            
             // 渲染待完成任务
             const pendingTasksContainer = document.getElementById('pendingTasks');
             pendingTasksContainer.innerHTML = '';
-            
+            
             if (pendingTasks.length > 0) {
                 pendingTasks.forEach(task => {
                     const taskElement = document.createElement('div');
                     taskElement.className = `task-item p-3 bg-white rounded-lg shadow cursor-pointer hover:bg-purple-50 ${getPriorityStyle(task.priority)}`;
                     taskElement.dataset.id = task.id;
-                    
+                    
                     taskElement.innerHTML = `
                         <div class="flex justify-between items-start">
                             <div>
@@ -1058,7 +1087,7 @@
                                     </span>
                                 </div>
                             </div>
-                            
+                            
                             ${currentUser === 'kitten' ? `
                                 <button class="complete-task-btn text-green-600 hover:text-green-800 p-1 rounded-full hover:bg-green-100" data-id="${task.id}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1066,7 +1095,7 @@
                                     </svg>
                                 </button>
                             ` : ''}
-                            
+                            
                             ${currentUser === 'master' ? `
                                 <div class="flex space-x-2">
                                     <button class="edit-task-btn text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100" data-id="${task.id}">
@@ -1083,32 +1112,32 @@
                             ` : ''}
                         </div>
                     `;
-                    
+                    
                     // 添加点击事件以查看任务详情
                     taskElement.addEventListener('click', (e) => {
                         // 如果点击的是按钮，不显示详情
                         if (e.target.closest('button')) return;
-                        
+                        
                         // 显示任务详情
                         showTaskDetails(task.id);
                     });
-                    
+                    
                     pendingTasksContainer.appendChild(taskElement);
                 });
             } else {
                 pendingTasksContainer.innerHTML = '<p class="text-gray-500 italic">没有待完成的任务</p>';
             }
-            
+            
             // 渲染已完成任务
             const completedTasksContainer = document.getElementById('completedTasks');
             completedTasksContainer.innerHTML = '';
-            
+            
             if (completedTasks.length > 0) {
                 completedTasks.forEach(task => {
                     const taskElement = document.createElement('div');
                     taskElement.className = 'task-item p-3 bg-gray-50 rounded-lg border border-gray-200 opacity-75 cursor-pointer';
                     taskElement.dataset.id = task.id;
-                    
+                    
                     taskElement.innerHTML = `
                         <div class="flex justify-between items-start">
                             <div>
@@ -1125,7 +1154,7 @@
                                     </span>
                                 </div>
                             </div>
-                            
+                            
                             ${currentUser === 'kitten' ? `
                                 <button class="uncomplete-task-btn text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-200" data-id="${task.id}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1135,36 +1164,36 @@
                             ` : ''}
                         </div>
                     `;
-                    
+                    
                     // 添加点击事件以查看任务详情
                     taskElement.addEventListener('click', (e) => {
                         // 如果点击的是按钮，不显示详情
                         if (e.target.closest('button')) return;
-                        
+                        
                         // 显示任务详情
                         showTaskDetails(task.id);
                     });
-                    
+                    
                     completedTasksContainer.appendChild(taskElement);
                 });
             } else {
                 completedTasksContainer.innerHTML = '<p class="text-gray-500 italic">没有完成的任务</p>';
             }
-            
+            
             // 添加任务按钮显示控制
             document.getElementById('addTaskBtn').style.display = currentUser === 'master' ? 'flex' : 'none';
         }
-        
+        
         // 渲染规则列表
         function renderRules() {
             const rulesContainer = document.getElementById('rulesList');
             rulesContainer.innerHTML = '';
-            
+            
             rules.forEach(rule => {
                 const ruleElement = document.createElement('div');
                 ruleElement.className = 'rule-item p-3 bg-white rounded-lg shadow cursor-pointer hover:bg-purple-50';
                 ruleElement.dataset.id = rule.id;
-                
+                
                 ruleElement.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div>
@@ -1175,16 +1204,16 @@
                                     ${rule.category}
                                 </span>
                                 <span class="text-xs ml-2 px-2 py-1 rounded ${
-                                    rule.importance === 'essential' ? 'bg-red-100 text-red-800' : 
-                                    rule.importance === 'high' ? 'bg-orange-100 text-orange-800' : 
+                                    rule.importance === 'essential' ? 'bg-red-100 text-red-800' : 
+                                    rule.importance === 'high' ? 'bg-orange-100 text-orange-800' : 
                                     'bg-yellow-100 text-yellow-800'
                                 }">
-                                    ${rule.importance === 'essential' ? '必要' : 
+                                    ${rule.importance === 'essential' ? '必要' : 
                                      rule.importance === 'high' ? '重要' : '标准'}
                                 </span>
                             </div>
                         </div>
-                        
+                        
                         ${currentUser === 'master' ? `
                             <div class="flex space-x-2">
                                 <button class="edit-rule-btn text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100" data-id="${rule.id}">
@@ -1201,35 +1230,35 @@
                         ` : ''}
                     </div>
                 `;
-                
+                
                 // 添加点击事件以查看规则详情
                 ruleElement.addEventListener('click', (e) => {
                     // 如果点击的是按钮，不显示详情
                     if (e.target.closest('button')) return;
-                    
+                    
                     // 显示规则详情
                     showRuleDetails(rule.id);
                 });
-                
+                
                 rulesContainer.appendChild(ruleElement);
             });
-            
+            
             // 添加规则按钮显示控制
             document.getElementById('masterOnlyRuleBtn').style.display = currentUser === 'master' ? 'block' : 'none';
         }
-        
+        
         // 渲染奖励列表
         function renderRewards() {
             // 更新积分显示
             document.getElementById('pointsDisplay').textContent = points;
-            
+            
             const rewardsContainer = document.getElementById('rewardsList');
             rewardsContainer.innerHTML = '';
-            
+            
             rewards.forEach(reward => {
                 const rewardElement = document.createElement('div');
                 rewardElement.className = 'reward-item p-4 bg-white rounded-lg shadow border border-purple-200';
-                
+                
                 rewardElement.innerHTML = `
                     <h4 class="font-medium text-lg">${reward.title}</h4>
                     <p class="text-sm mt-1">${reward.description}</p>
@@ -1241,10 +1270,10 @@
                             ${reward.cost} 积分
                         </span>
                     </div>
-                    
+                    
                     ${currentUser === 'kitten' ? `
                         <div class="mt-3">
-                            <button 
+                            <button 
                                 class="claim-reward-btn w-full py-2 rounded-lg transition-colors ${
                                     points >= reward.cost && reward.available
                                         ? 'bg-purple-600 text-white hover:bg-purple-700'
@@ -1257,16 +1286,16 @@
                             </button>
                         </div>
                     ` : ''}
-                    
+                    
                     ${currentUser === 'master' ? `
                         <div class="mt-3 flex space-x-2">
-                            <button 
+                            <button 
                                 class="edit-reward-btn flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                                 data-id="${reward.id}"
                             >
                                 编辑
                             </button>
-                            <button 
+                            <button 
                                 class="delete-reward-btn flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                                 data-id="${reward.id}"
                             >
@@ -1275,19 +1304,19 @@
                         </div>
                     ` : ''}
                 `;
-                
+                
                 rewardsContainer.appendChild(rewardElement);
             });
-            
+            
             // 添加奖励按钮显示控制
             document.getElementById('masterOnlyRewardBtn').style.display = currentUser === 'master' ? 'block' : 'none';
         }
-        
+        
         // 渲染消息列表
         function renderMessages() {
             const messageList = document.getElementById('messageList');
             messageList.innerHTML = '';
-            
+            
             messages.forEach(message => {
                 const messageElement = document.createElement('div');
                 messageElement.className = `p-2 rounded-lg ${
@@ -1295,67 +1324,67 @@
                         ? 'bg-purple-100 ml-8'
                         : 'bg-gray-100 mr-8'
                 } ${!message.read && message.sender !== currentUser ? 'border-l-4 border-purple-500' : ''}`;
-                
+                
                 messageElement.innerHTML = `
                     <p class="text-sm">${message.content}</p>
                     <p class="text-xs text-gray-500 mt-1">
                         ${message.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </p>
                 `;
-                
+                
                 messageList.appendChild(messageElement);
-                
+                
                 // 标记为已读
                 if (message.sender !== currentUser && !message.read) {
                     message.read = true;
                 }
             });
-            
+            
             // 更新未读消息状态
             updateUnreadBadge();
         }
-        
+        
         // 更新未读消息徽章
         function updateUnreadBadge() {
             const unreadBadge = document.getElementById('unreadBadge');
             const hasUnread = messages.some(msg => !msg.read && msg.sender !== currentUser);
-            
+            
             if (hasUnread) {
                 unreadBadge.classList.remove('hidden');
             } else {
                 unreadBadge.classList.add('hidden');
             }
         }
-        
+        
         // 显示任务详情
         function showTaskDetails(taskId) {
             const task = tasks.find(t => t.id === taskId);
             if (!task) return;
-            
+            
             currentTaskId = taskId;
-            
+            
             // 填充任务详情
             document.getElementById('taskDetailsTitle').textContent = task.title;
             document.getElementById('taskDetailsDescription').textContent = task.description;
             document.getElementById('taskDetailsCategory').textContent = task.category;
             document.getElementById('taskDetailsCategory').className = `text-xs px-2 py-1 rounded ${getCategoryColor(task.category)}`;
-            
-            document.getElementById('taskDetailsPriority').textContent = 
-                task.priority === 'high' ? '高' : 
+            
+            document.getElementById('taskDetailsPriority').textContent = 
+                task.priority === 'high' ? '高' : 
                 task.priority === 'medium' ? '中' : '低';
             document.getElementById('taskDetailsPriority').className = `text-xs px-2 py-1 rounded ${
-                task.priority === 'high' ? 'bg-red-100 text-red-800' : 
-                task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
+                task.priority === 'high' ? 'bg-red-100 text-red-800' : 
+                task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
                 'bg-green-100 text-green-800'
             }`;
-            
+            
             document.getElementById('taskDetailsSetter').textContent = task.setBy === 'master' ? '主人' : '小猫';
             document.getElementById('taskDetailsDeadline').textContent = formatDateTime(task.deadline);
             document.getElementById('taskDetailsPoints').textContent = task.points;
-            
+            
             document.getElementById('taskDetailsStatus').textContent = task.completed ? '已完成' : '待完成';
             document.getElementById('taskDetailsStatus').className = task.completed ? 'text-green-600' : 'text-yellow-600';
-            
+            
             // 显示/隐藏小猫操作按钮
             const kittenActions = document.getElementById('kittenTaskActions');
             if (currentUser === 'kitten' && !task.completed) {
@@ -1364,47 +1393,47 @@
             } else {
                 kittenActions.classList.add('hidden');
             }
-            
+            
             // 显示模态框
             document.getElementById('taskDetailsModal').style.display = 'block';
         }
-        
+        
         // 显示规则详情
         function showRuleDetails(ruleId) {
             const rule = rules.find(r => r.id === ruleId);
             if (!rule) return;
-            
+            
             currentRuleId = ruleId;
-            
+            
             // 填充规则详情
             document.getElementById('ruleDetailsTitle').textContent = rule.title;
             document.getElementById('ruleDetailsDescription').textContent = rule.description;
             document.getElementById('ruleDetailsCategory').textContent = rule.category;
             document.getElementById('ruleDetailsCategory').className = `text-xs px-2 py-1 rounded ${getCategoryColor(rule.category)}`;
-            
-            document.getElementById('ruleDetailsImportance').textContent = 
-                rule.importance === 'essential' ? '必要' : 
+            
+            document.getElementById('ruleDetailsImportance').textContent = 
+                rule.importance === 'essential' ? '必要' : 
                 rule.importance === 'high' ? '重要' : '标准';
             document.getElementById('ruleDetailsImportance').className = `text-xs px-2 py-1 rounded ${
-                rule.importance === 'essential' ? 'bg-red-100 text-red-800' : 
-                rule.importance === 'high' ? 'bg-orange-100 text-orange-800' : 
+                rule.importance === 'essential' ? 'bg-red-100 text-red-800' : 
+                rule.importance === 'high' ? 'bg-orange-100 text-orange-800' : 
                 'bg-yellow-100 text-yellow-800'
             }`;
-            
+            
             document.getElementById('ruleDetailsConsequence').textContent = rule.consequence;
-            
+            
             // 显示模态框
             document.getElementById('ruleDetailsModal').style.display = 'block';
         }
-        
+        
         // 完成任务
         function completeTask(taskId) {
             const task = tasks.find(t => t.id === taskId);
             if (!task) return;
-            
+            
             task.completed = true;
             points += task.points;
-            
+            
             // 添加完成任务的消息
             messages.push({
                 id: messages.length + 1,
@@ -1413,7 +1442,7 @@
                 timestamp: new Date(),
                 read: false
             });
-            
+            
             // 添加主人的自动回复
             setTimeout(() => {
                 messages.push({
@@ -1423,44 +1452,44 @@
                     timestamp: new Date(),
                     read: false
                 });
-                
+                
                 // 更新未读消息状态
                 updateUnreadBadge();
             }, 1000);
-            
+            
             // 关闭模态框
             document.getElementById('taskDetailsModal').style.display = 'none';
-            
+            
             // 更新任务列表
             renderTasks();
-            
+            
             // 更新积分显示
             document.getElementById('pointsDisplay').textContent = points;
         }
-        
+        
         // 取消完成任务
         function uncompleteTask(taskId) {
             const task = tasks.find(t => t.id === taskId);
             if (!task) return;
-            
+            
             task.completed = false;
             points = Math.max(0, points - task.points);
-            
+            
             // 更新任务列表
             renderTasks();
-            
+            
             // 更新积分显示
             document.getElementById('pointsDisplay').textContent = points;
         }
-        
+        
         // 兑换奖励
         function claimReward(rewardId) {
             const reward = rewards.find(r => r.id === rewardId);
             if (!reward) return;
-            
+            
             if (points >= reward.cost) {
                 points -= reward.cost;
-                
+                
                 // 添加兑换奖励的消息
                 messages.push({
                     id: messages.length + 1,
@@ -1469,7 +1498,7 @@
                     timestamp: new Date(),
                     read: false
                 });
-                
+                
                 // 添加主人的自动回复
                 setTimeout(() => {
                     messages.push({
@@ -1479,29 +1508,29 @@
                         timestamp: new Date(),
                         read: false
                     });
-                    
+                    
                     // 更新未读消息状态
                     updateUnreadBadge();
                 }, 1000);
-                
+                
                 // 更新奖励列表
                 renderRewards();
-                
+                
                 // 更新积分显示
                 document.getElementById('pointsDisplay').textContent = points;
-                
+                
                 // 显示成功消息
                 alert(`成功兑换奖励：${reward.title}`);
             } else {
                 alert('积分不足，无法兑换此奖励');
             }
         }
-        
+        
         // 发送消息
         function sendMessage() {
             const input = document.getElementById('newMessageInput');
             const content = input.value.trim();
-            
+            
             if (content) {
                 messages.push({
                     id: messages.length + 1,
@@ -1510,13 +1539,13 @@
                     timestamp: new Date(),
                     read: false
                 });
-                
+                
                 // 清空输入框
                 input.value = '';
-                
+                
                 // 更新消息列表
                 renderMessages();
-                
+                
                 // 添加主人的自动回复
                 if (currentUser === 'kitten') {
                     setTimeout(() => {
@@ -1527,9 +1556,9 @@
                             "好的，记录下来了。有任何问题随时告诉我。",
                             "我很高兴收到你的消息。继续努力。"
                         ];
-                        
+                        
                         const randomReply = replies[Math.floor(Math.random() * replies.length)];
-                        
+                        
                         messages.push({
                             id: messages.length + 1,
                             sender: 'master',
@@ -1537,29 +1566,29 @@
                             timestamp: new Date(),
                             read: false
                         });
-                        
+                        
                         // 更新消息列表
                         renderMessages();
-                        
+                        
                         // 更新未读消息状态
                         updateUnreadBadge();
                     }, 1500);
                 }
             }
         }
-        
+        
         // 切换用户类型
         function toggleUserType() {
             currentUser = currentUser === 'master' ? 'kitten' : 'master';
             document.getElementById('currentRole').textContent = currentUser === 'master' ? '主人' : '小猫';
-            
+            
             // 更新用户特定视图
             updateUserSpecificViews();
-            
+            
             // 重新渲染当前视图
             renderCurrentView();
         }
-        
+        
         // 更新用户特定视图
         function updateUserSpecificViews() {
             // 添加按钮显示控制
@@ -1568,11 +1597,11 @@
             document.getElementById('masterOnlyRuleBtn').style.display = currentUser === 'master' ? 'block' : 'none';
             document.getElementById('masterOnlyRewardBtn').style.display = currentUser === 'master' ? 'block' : 'none';
         }
-        
+        
         // 显示添加项目模态框
         function showAddItemModal(type) {
             currentModalType = type;
-            
+            
             // 设置模态框标题
             const titleMap = {
                 'event': '添加新日程',
@@ -1580,23 +1609,23 @@
                 'rule': '添加新规则',
                 'reward': '添加新奖励'
             };
-            
+            
             document.getElementById('addItemTitle').textContent = titleMap[type];
-            
+            
             // 隐藏所有特定字段
             document.getElementById('eventFields').classList.add('hidden');
             document.getElementById('taskFields').classList.add('hidden');
             document.getElementById('ruleFields').classList.add('hidden');
             document.getElementById('rewardFields').classList.add('hidden');
-            
+            
             // 显示特定类型的字段
             document.getElementById(`${type}Fields`).classList.remove('hidden');
-            
+            
             // 设置默认值
             document.getElementById('newItemTitle').value = '';
             document.getElementById('newItemDescription').value = '';
             document.getElementById('newItemCategory').value = 'general';
-            
+            
             // 设置特定类型的默认值
             if (type === 'event') {
                 const now = new Date();
@@ -1615,32 +1644,32 @@
             } else if (type === 'reward') {
                 document.getElementById('newRewardCost').value = '50';
             }
-            
+            
             // 显示模态框
             document.getElementById('addItemModal').style.display = 'block';
         }
-        
+        
         // 添加新项目
         function addNewItem() {
             const title = document.getElementById('newItemTitle').value.trim();
             const description = document.getElementById('newItemDescription').value.trim();
             const category = document.getElementById('newItemCategory').value;
-            
+            
             if (!title) {
                 alert('请输入标题');
                 return;
             }
-            
+            
             // 根据类型添加不同的项目
             if (currentModalType === 'event') {
                 const dateTimeStr = document.getElementById('newEventDateTime').value;
                 const date = new Date(dateTimeStr);
-                
+                
                 if (!dateTimeStr) {
                     alert('请选择日期和时间');
                     return;
                 }
-                
+                
                 const newEvent = {
                     id: events.length + 1,
                     title: title,
@@ -1652,9 +1681,9 @@
                     feedback: '',
                     approved: false
                 };
-                
+                
                 events.push(newEvent);
-                
+                
                 // 通知
                 if (currentUser === 'master') {
                     messages.push({
@@ -1664,11 +1693,11 @@
                         timestamp: new Date(),
                         read: false
                     });
-                    
+                    
                     // 更新未读消息状态
                     updateUnreadBadge();
                 }
-                
+                
                 // 重新渲染日历
                 renderCalendar();
             } else if (currentModalType === 'task') {
@@ -1676,12 +1705,12 @@
                 const deadline = new Date(deadlineStr);
                 const priority = document.getElementById('newTaskPriority').value;
                 const points = parseInt(document.getElementById('newTaskPoints').value);
-                
+                
                 if (!deadlineStr) {
                     alert('请选择截止日期');
                     return;
                 }
-                
+                
                 const newTask = {
                     id: tasks.length + 1,
                     title: title,
@@ -1693,9 +1722,9 @@
                     category: category,
                     points: points
                 };
-                
+                
                 tasks.push(newTask);
-                
+                
                 // 通知
                 if (currentUser === 'master') {
                     messages.push({
@@ -1705,22 +1734,22 @@
                         timestamp: new Date(),
                         read: false
                     });
-                    
+                    
                     // 更新未读消息状态
                     updateUnreadBadge();
                 }
-                
+                
                 // 重新渲染任务列表
                 renderTasks();
             } else if (currentModalType === 'rule') {
                 const importance = document.getElementById('newRuleImportance').value;
                 const consequence = document.getElementById('newRuleConsequence').value.trim();
-                
+                
                 if (!consequence) {
                     alert('请输入违反后果');
                     return;
                 }
-                
+                
                 const newRule = {
                     id: rules.length + 1,
                     title: title,
@@ -1729,9 +1758,9 @@
                     importance: importance,
                     consequence: consequence
                 };
-                
+                
                 rules.push(newRule);
-                
+                
                 // 通知
                 if (currentUser === 'master') {
                     messages.push({
@@ -1741,21 +1770,21 @@
                         timestamp: new Date(),
                         read: false
                     });
-                    
+                    
                     // 更新未读消息状态
                     updateUnreadBadge();
                 }
-                
+                
                 // 重新渲染规则列表
                 renderRules();
             } else if (currentModalType === 'reward') {
                 const cost = parseInt(document.getElementById('newRewardCost').value);
-                
+                
                 if (isNaN(cost) || cost <= 0) {
                     alert('请输入有效的积分值');
                     return;
                 }
-                
+                
                 const newReward = {
                     id: rewards.length + 1,
                     title: title,
@@ -1764,9 +1793,9 @@
                     category: category,
                     available: true
                 };
-                
+                
                 rewards.push(newReward);
-                
+                
                 // 通知
                 if (currentUser === 'master') {
                     messages.push({
@@ -1776,46 +1805,46 @@
                         timestamp: new Date(),
                         read: false
                     });
-                    
+                    
                     // 更新未读消息状态
                     updateUnreadBadge();
                 }
-                
+                
                 // 重新渲染奖励列表
                 renderRewards();
             }
-            
+            
             // 关闭模态框
             document.getElementById('addItemModal').style.display = 'none';
         }
-        
+        
         // 切换视图
         function switchView(view) {
             // 隐藏所有视图
             document.querySelectorAll('.view-content').forEach(el => {
                 el.classList.add('hidden');
             });
-            
+            
             // 移除所有导航按钮的激活状态
             document.querySelectorAll('.view-btn').forEach(btn => {
                 btn.classList.remove('border-purple-500', 'text-purple-600');
                 btn.classList.add('border-transparent', 'hover:border-gray-300');
             });
-            
+            
             // 显示选中的视图
             document.getElementById(`${view}View`).classList.remove('hidden');
-            
+            
             // 激活导航按钮
             document.querySelector(`.view-btn[data-view="${view}"]`).classList.remove('border-transparent', 'hover:border-gray-300');
             document.querySelector(`.view-btn[data-view="${view}"]`).classList.add('border-purple-500', 'text-purple-600');
-            
+            
             // 更新当前视图
             currentView = view;
-            
+            
             // 渲染视图内容
             renderCurrentView();
         }
-        
+        
         // 渲染当前视图
         function renderCurrentView() {
             switch (currentView) {
@@ -1833,71 +1862,71 @@
                     break;
             }
         }
-        
+        
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
             // 初始化视图
             updateUserSpecificViews();
             renderCurrentView();
-            
+            
             // 初始化未读消息状态
             updateUnreadBadge();
-            
+            
             // 绑定事件处理函数
-            
+            
             // 导航切换
             document.querySelectorAll('.view-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     switchView(btn.dataset.view);
                 });
             });
-            
+            
             // 用户类型切换
             document.getElementById('userToggle').addEventListener('click', toggleUserType);
-            
+            
             // 消息面板切换
             document.getElementById('messageToggle').addEventListener('click', () => {
                 const messagePanel = document.getElementById('messagePanel');
                 messagePanel.classList.toggle('hidden');
-                
+                
                 if (!messagePanel.classList.contains('hidden')) {
                     // 显示消息面板时渲染消息列表
                     renderMessages();
                 }
             });
-            
+            
             // 日历导航
             document.getElementById('prevMonthBtn').addEventListener('click', () => {
                 selectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1);
                 renderCalendar();
             });
-            
+            
             document.getElementById('nextMonthBtn').addEventListener('click', () => {
                 selectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1);
                 renderCalendar();
             });
-            
+            
             // 添加按钮事件
             document.getElementById('addEventBtn').addEventListener('click', () => showAddItemModal('event'));
             document.getElementById('addTaskBtn').addEventListener('click', () => showAddItemModal('task'));
             document.getElementById('addRuleBtn').addEventListener('click', () => showAddItemModal('rule'));
             document.getElementById('addRewardBtn').addEventListener('click', () => showAddItemModal('reward'));
-            
+            
             // 添加项目确认按钮
             document.getElementById('addItemBtn').addEventListener('click', addNewItem);
-            
+            
             // 发送消息按钮
             document.getElementById('sendMessageBtn').addEventListener('click', sendMessage);
-            
+            
             // 消息输入框回车发送
             document.getElementById('newMessageInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     sendMessage();
                 }
             });
-            
-            // 关闭模态框按钮
             
+            // 关闭模态框按钮
+            document.querySelector
 // 关闭模态框按钮
             document.querySelectorAll('.modal-close').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -1906,7 +1935,7 @@
                     });
                 });
             });
-            
+            
             // 点击模态框外部关闭
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.addEventListener('click', (e) => {
@@ -1915,7 +1944,7 @@
                     }
                 });
             });
-            
+            
             // 完成任务按钮
             document.addEventListener('click', (e) => {
                 // 完成任务
@@ -1923,36 +1952,66 @@
                     const taskId = parseInt(e.target.closest('.complete-task-btn').dataset.id);
                     completeTask(taskId);
                 }
-                
+                
                 // 取消完成任务
                 if (e.target.closest('.uncomplete-task-btn')) {
                     const taskId = parseInt(e.target.closest('.uncomplete-task-btn').dataset.id);
                     uncompleteTask(taskId);
                 }
-                
+                
                 // 兑换奖励
                 if (e.target.closest('.claim-reward-btn')) {
                     const rewardId = parseInt(e.target.closest('.claim-reward-btn').dataset.id);
                     claimReward(rewardId);
                 }
-                
+                
                 // 编辑任务/规则/奖励按钮（实际功能待实现）
-                if (e.target.closest('.edit-task-btn') || 
-                    e.target.closest('.edit-event-btn') || 
-                    e.target.closest('.edit-rule-btn') || 
+                if (e.target.closest('.edit-task-btn') || 
+                    e.target.closest('.edit-event-btn') || 
+                    e.target.closest('.edit-rule-btn') || 
                     e.target.closest('.edit-reward-btn')) {
                     alert('编辑功能正在开发中...');
                 }
-                
+                
                 // 删除任务/规则/奖励按钮（实际功能待实现）
-                if (e.target.closest('.delete-task-btn') || 
-                    e.target.closest('.delete-event-btn') || 
-                    e.target.closest('.delete-rule-btn') || 
+                if (e.target.closest('.delete-task-btn') || 
+                    e.target.closest('.delete-event-btn') || 
+                    e.target.closest('.delete-rule-btn') || 
                     e.target.closest('.delete-reward-btn')) {
                     alert('删除功能正在开发中...');
                 }
             });
         });
-    </script>
+    javascript
+// 为移动设备优化点击事件
+function addMobileTouchSupport() {
+    // 为导航按钮添加触摸支持
+    document.querySelectorAll('.view-btn').forEach(function(btn) {
+        btn.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            const view = this.dataset.view;
+            console.log("触摸切换视图到: " + view);
+            switchView(view);
+        }, {passive: false});
+    });
+    
+    // 为模态框关闭按钮添加触摸支持
+    document.querySelectorAll('.modal-close').forEach(function(btn) {
+        btn.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            console.log("触摸关闭按钮");
+            document.querySelectorAll('.modal').forEach(function(modal) {
+                modal.style.display = 'none';
+            });
+        }, {passive: false});
+    });
+}
+
+// 检测是否为移动设备
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+if(isMobile) {
+    console.log("检测到移动设备，添加触摸支持");
+    addMobileTouchSupport();
+}</script>
 </body>
 </html>
