@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主人与小猫的日程管理</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .task-item {
+            transition: all 0.3s ease;
+        }
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .task-completed {
+            opacity: 0.7;
+            text-decoration: line-through;
+        }
+        .reward-item {
+            transition: all 0.3s ease;
+        }
+        .reward-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .rule-item {
+            transition: all 0.3s ease;
+        }
+        .rule-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .event-item {
+            transition: all 0.3s ease;
+        }
+        .event-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            overflow: auto;
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+        }
+        .hidden {
+            display: none;
+        }
+        .day-cell {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .day-cell:hover {
+            background-color: #f3e8ff;
+        }
+        .day-selected {
+            background-color: #a855f7 !important;
+            color: white;
+        }
+        .day-today {
+            background-color: #f3e8ff;
+            border: 1px solid #a855f7;
+        }
+        .day-has-events {
+            position: relative;
+        }
+        .day-has-events::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background-color: #a855f7;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <header class="bg-purple-600 text-white py-4 px-6 shadow-md">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <h1 class="text-2xl font-bold">主人与小猫的日程管理</h1>
+                <div 
+                    id="userToggle"
+                    class="cursor-pointer text-sm bg-purple-700 hover:bg-purple-800 px-3 py-1 rounded-full flex items-center"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    当前身份: <span id="currentRole">小猫</span>
+                </div>
+            </div>
+            
+            <div class="relative">
+                <button 
+                    id="messageToggle"
+                    class="p-2 bg-purple-700 rounded-full hover:bg-purple-800 relative"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                    <span id="unreadBadge" class="absolute top-0 right-0 bg-red-500 w-3 h-3 rounded-full hidden"></span>
+                </button>
+                
+                <div id="messagePanel" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-10 hidden">
+                    <div class="p-3 border-b border-gray-200">
+                        <h3 class="font-medium">消息</h3>
+                    </div>
+                    
+                    <div id="messageList" class="max-h-96 overflow-y-auto p-3 space-y-3">
+                        <!-- Messages will be added here -->
+                    </div>
+                    
+                    <div class="p-3 border-t border-gray-200">
+                        <div class="flex">
+                            <input 
+                                id="newMessageInput"
+                                type="text"
+                                class="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                placeholder="输入消息..."
+                            />
+                            <button 
+                                id="sendMessageBtn"
+                                class="bg-purple-600 text-white px-4 py-2 rounded-r-lg hover:bg-purple-700"
+                            >
+                                发送
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <main class="max-w-6xl mx-auto py-6 px-4">
+        <!-- 导航 -->
+        <nav class="flex border-b border-gray-200 mb-6">
+            <button 
+                data-view="calendar"
+                class="view-btn px-4 py-2 font-medium border-b-2 border-purple-500 text-purple-600"
+            >
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    日程
+                </div>
+            </button>
+            
+            <button 
+                data-view="tasks"
+                class="view-btn px-4 py-2 font-medium border-b-2 border-transparent hover:border-gray-300"
+            >
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    任务
+                </div>
+            </button>
+            
+            <button 
+                data-view="rules"
+                class="view-btn px-4 py-2 font-medium border-b-2 border-transparent hover:border-gray-300"
+            >
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    规则
+                </div>
+            </button>
+            
+            <button 
+                data-view="rewards"
+                class="view-btn px-4 py-2 font-medium border-b-2 border-transparent hover:border-gray-300"
+            >
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                    </svg>
+                    奖励
+                </div>
+            </button>
+        </nav>
+        
+        <!-- 视图内容 -->
+        <div id="viewContainer">
+            <!-- Calendar View -->
+            <div id="calendarView" class="view-content">
+                <div class="flex justify-between items-center mb-4">
+                    <button 
+                        id="prevMonthBtn"
+                        class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
+                    >
+                        上个月
+                    </button>
+                    <h2 id="currentMonth" class="text-xl font-semibold">
+                        2023年4月
+                    </h2>
+                    <button 
+                        id="nextMonthBtn"
+                        class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
+                    >
+                        下个月
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-7 gap-2 text-center font-medium mb-2">
+                    <div>日</div>
+                    <div>一</div>
+                    <div>二</div>
+                    <div>三</div>
+                    <div>四</div>
+                    <div>五</div>
+                    <div>六</div>
+                </div>
+                
+                <div id="calendarDays" class="grid grid-cols-7 gap-2">
+                    <!-- Calendar days will be added here -->
+                </div>
+                
+                <div class="mt-6">
+                    <h3 id="selectedDate" class="text-lg font-semibold mb-3">
+                        2023年4月1日 的日程
+                    </h3>
+                    <div id="eventsForDay" class="space-y-2">
+                        <!-- Events for selected day will be added here -->
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button 
+                            id="addEventBtn"
+                            class="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            添加新日程
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tasks View -->
+            <div id="tasksView" class="view-content hidden">
+                <h2 class="text-xl font-semibold mb-4">任务列表</h2>
+                
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium mb-3 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        待完成任务 (<span id="pendingTaskCount">0</span>)
+                    </h3>
+                    
+                    <div id="pendingTasks" class="space-y-3">
+                        <!-- Pending tasks will be added here -->
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-medium mb-3 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        已完成任务 (<span id="completedTaskCount">0</span>)
+                    </h3>
+                    
+                    <div id="completedTasks" class="space-y-3">
+                        <!-- Completed tasks will be added here -->
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button 
+                        id="addTaskBtn"
+                        class="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        添加新任务
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Rules View -->
+            <div id="rulesView" class="view-content hidden">
+                <h2 class="text-xl font-semibold mb-4">规则与期望</h2>
+                
+                <div id="rulesList" class="space-y-3">
+                    <!-- Rules will be added here -->
+                </div>
+                
+                <div id="masterOnlyRuleBtn" class="mt-4 hidden">
+                    <button 
+                        id="addRuleBtn"
+                        class="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        添加新规则
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Rewards View -->
+            <div id="rewardsView" class="view-content hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">奖励兑换</h2>
+                    <div class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                        </svg>
+                        <span id="pointsDisplay">0</span> 积分
+                    </div>
+                </div>
+                
+                <div id="rewardsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Rewards will be added here -->
+                </div>
+                
+                <div id="masterOnlyRewardBtn" class="mt-4 hidden">
+                    <button 
+                        id="addRewardBtn"
+                        class="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        添加新奖励
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Task Details Modal -->
+    <div id="taskDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-start mb-4">
+                <h3 id="taskDetailsTitle" class="text-xl font-semibold">任务详情</h3>
+                <button class="modal-close text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p id="taskDetailsDescription" class="text-gray-700">任务描述</p>
+            </div>
+            
+            <div class="space-y-2 mb-4">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">类别:</span>
+                    <span id="taskDetailsCategory" class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800">
+                        类别
+                    </span>
+                </div>
+                
+                <div class="flex justify-between">
+                    <span class="text-gray-600">优先级:</span>
+                    <span id="taskDetailsPriority" class="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-800">
+                        中
+                    </span>
+                </div>
+                
+                <div class="flex justify-between">
+                    <span class="text-gray-600">设定者:</span>
+                    <span id="taskDetailsSetter">主人</span>
+                </div>
+                
+                <div class="flex justify-between">
+                    <span class="text-gray-600">截止时间:</span>
+                    <span id="taskDetailsDeadline">2023-04-01 18:00</span>
+                </div>
+                
+                <div class="flex justify-between">
+                    <span class="text-gray-600">奖励积分:</span>
+                    <span id="taskDetailsPoints" class="font-medium text-purple-700">10</span>
+                </div>
+                
+                <div class="flex justify-between">
+                    <span class="text-gray-600">状态:</span>
+                    <span id="taskDetailsStatus" class="text-yellow-600">
+                        待完成
+                    </span>
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+                <div id="kittenTaskActions" class="hidden">
+                    <button 
+                        id="completeTaskBtn"
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    >
+                        标记为已完成
+                    </button>
+                </div>
+                
+                <button 
+                    class="modal-close px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400"
+                >
+                    关闭
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rule Details Modal -->
+    <div id="ruleDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-start mb-4">
+                <h3 id="ruleDetailsTitle" class="text-xl font-semibold">规则详情</h3>
+                <button class="modal-close text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p id="ruleDetailsDescription" class="text-gray-700">规则描述</p>
+            </div>
+            
+            <div class="space-y-2 mb-4">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">类别:</span>
+                    <span id="ruleDetailsCategory" class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800">
+                        类别
+                    </span>
+                </div>
+                
+                <div class="flex justify-between">
+                    <span class="text-gray-600">重要性:</span>
+                    <span id="ruleDetailsImportance" class="text-xs px-2 py-1 rounded bg-red-100 text-red-800">
+                        必要
+                    </span>
+                </div>
+                
+                <div class="mt-2">
+                    <span class="text-gray-600">违反后果:</span>
+                    <p id="ruleDetailsConsequence" class="mt-1 text-gray-700 p-2 bg-gray-50 rounded">
+                        后果描述
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex justify-end">
+                <button 
+                    class="modal-close px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400"
+                >
+                    关闭
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Item Modal -->
+    <div id="addItemModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-start mb-4">
+                <h3 id="addItemTitle" class="text-xl font-semibold">添加新项目</h3>
+                <button class="modal-close text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="space-y-4 mb-4">
+                <!-- 通用字段：标题和描述 -->
+                <div>
+                    <label class="block text-gray-700 mb-1">标题</label>
+                    <input 
+                        id="newItemTitle"
+                        type="text"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 mb-1">描述</label>
+                    <textarea 
+                        id="newItemDescription"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        rows="3"
+                    ></textarea>
+                </div>
+                
+                <!-- 日程特有字段 -->
+                <div id="eventFields" class="hidden">
+                    <label class="block text-gray-700 mb-1">日期和时间</label>
+                    <input 
+                        id="newEventDateTime"
+                        type="datetime-local"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                </div>
+                
+                <!-- 任务特有字段 -->
+                <div id="taskFields" class="hidden">
+                    <div>
+                        <label class="block text-gray-700 mb-1">截止日期</label>
+                        <input 
+                            id="newTaskDeadline"
+                            type="datetime-local"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        />
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="block text-gray-700 mb-1">优先级</label>
+                        <select 
+                            id="newTaskPriority"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        >
+                            <option value="high">高</option>
+                            <option value="medium" selected>中</option>
+                            <option value="low">低</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="block text-gray-700 mb-1">奖励积分</label>
+                        <input 
+                            id="newTaskPoints"
+                            type="number"
+                            value="5"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        />
+                    </div>
+                </div>
+                
+                <!-- 规则特有字段 -->
+                <div id="ruleFields" class="hidden">
+                    <div>
+                        <label class="block text-gray-700 mb-1">重要性</label>
+                        <select 
+                            id="newRuleImportance"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        >
+                            <option value="essential">必要</option>
+                            <option value="high">重要</option>
+                            <option value="standard" selected>标准</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="block text-gray-700 mb-1">违反后果</label>
+                        <textarea 
+                            id="newRuleConsequence"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            rows="2"
+                        ></textarea>
+                    </div>
+                </div>
+                
+                <!-- 奖励特有字段 -->
+                <div id="rewardFields" class="hidden">
+                    <div>
+                        <label class="block text-gray-700 mb-1">所需积分</label>
+                        <input 
+                            id="newRewardCost"
+                            type="number"
+                            value="50"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        />
+                    </div>
+                </div>
+                
+                <!-- 通用字段：类别 -->
+                <div>
+                    <label class="block text-gray-700 mb-1">类别</label>
+                    <select 
+                        id="newItemCategory"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                        <option value="routine">日常</option>
+                        <option value="work">工作</option>
+                        <option value="health">健康</option>
+                        <option value="growth">成长</option>
+                        <option value="connection">连接</option>
+                        <option value="communication">沟通</option>
+                        <option value="obedience">服从</option>
+                        <option value="freedom">自由</option>
+                        <option value="attention">关注</option>
+                        <option value="gift">礼物</option>
+                        <option value="experience">体验</option>
+                        <option value="general" selected>通用</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+                <button 
+                    class="modal-close px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400"
+                >
+                    取消
+                </button>
+                
+                <button 
+                    id="addItemBtn"
+                    class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                >
+                    添加
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始数据
+        let currentUser = 'kitten'; // 'master' or 'kitten'
+        let points = 75;
+        let currentView = 'calendar';
+        let currentDate = new Date();
+        let selectedDate = new Date();
+        
+        // 日程数据
+        let events = [
+            { 
+                id: 1, 
+                title: '早晨汇报', 
+                date: new Date(new Date().setHours(8, 0, 0, 0)), 
+                description: '向主人汇报昨晚的睡眠情况和今天的感受',
+                status: 'pending',
+                category: 'routine',
+                setBy: 'master',
+                feedback: '',
+                approved: false
+            },
+            { 
+                id: 2, 
+                title: '完成工作任务', 
+                date: new Date(new Date().setHours(14, 0, 0, 0)), 
+                description: '按时完成所有工作相关任务',
+                status: 'pending',
+                category: 'work',
+                setBy: 'master',
+                feedback: '',
+                approved: false
+            },
+            { 
+                id: 3, 
+                title: '运动时间', 
+                date: new Date(new Date().setHours(17, 30, 0, 0)), 
+                description: '至少30分钟的有氧运动',
+                status: 'pending',
+                category: 'health',
+                setBy: 'master',
+                feedback: '',
+                approved: false
+            },
+            { 
+                id: 4, 
+                title: '晚间总结', 
+                date: new Date(new Date().setHours(21, 0, 0, 0)), 
+                description: '向主人汇报今天的完成情况和情绪状态',
+                status: 'pending',
+                category: 'routine',
+                setBy: 'master',
+                feedback: '',
+                approved: false
+            }
+        ];
+        
+        // 任务数据
+        let tasks = [
+            {
+                id: 1,
+                title: '发送今日照片',
+                description: '每天至少发送一张照片给主人',
+                priority: 'high',
+                deadline: new Date(new Date().setHours(20, 0, 0, 0)),
+                completed: false,
+                setBy: 'master',
+                category: 'connection',
+                points: 10
+            },
+            {
+                id: 2,
+                title: '喝足够的水',
+                description: '全天至少8杯水',
+                priority: 'medium',
+                deadline: new Date(new Date().setHours(22, 0, 0, 0)),
+                completed: false,
+                setBy: 'master',
+                category: 'health',
+                points: 5
+            },
+            {
+                id: 3,
+                title: '阅读指定书籍',
+                description: '继续阅读主人推荐的书籍，做好笔记',
+                priority: 'medium',
+                deadline: new Date(new Date().setHours(22, 0, 0, 0)),
+                completed: false,
+                setBy: 'master',
+                category: 'growth',
+                points: 15
+            }
+        ];
+        
+        // 规则数据
+        let rules = [
+            {
+                id: 1,
+                title: '每日汇报',
+                description: '每天早晚各一次向主人汇报状态',
+                category: 'communication',
+                importance: 'essential',
+                consequence: '如果错过，需要写详细的解释信'
+            },
+            {
+                id: 2,
+                title: '健康饮食',
+                description: '遵循主人设定的健康饮食计划',
+                category: 'health',
+                importance: 'high',
+                consequence: '每次违反扣除10点奖励积分'
+            },
+            {
+                id: 3,
+                title: '按时休息',
+                description: '除非得到主人许可，不得晚于23:00入睡',
+                category: 'health',
+                importance: 'high',
+                consequence: '每晚超时需要进行额外的晨间体能训练'
+            },
+            {
+                id: 4,
+                title: '服从主人指令',
+                description: '除非有正当理由，否则必须服从主人的指令',
+                category: 'obedience',
+                importance: 'essential',
+                consequence: '视情况由主人决定适当的惩罚措施'
+            }
+        ];
+        
+        // 奖励数据
+        let rewards = [
+            {
+                id: 1,
+                title: '主人的特别关注',
+                description: '获得主人一小时的完全专注时间',
+                cost: 50,
+                category: 'attention',
+                available: true
+            },
+            {
+                id: 2,
+                title: '特殊许可',
+                description: '获得一次破例的机会，可以打破一条非核心规则',
+                cost: 100,
+                category: 'freedom',
+                available: true
+            },
+            {
+                id: 3,
+                title: '礼物选择权',
+                description: '可以请求一件由主人决定的礼物',
+                cost: 150,
+                category: 'gift',
+                available: true
+            },
+            {
+                id: 4,
+                title: '特别约会',
+                description: '与主人进行一次特别的约会，地点和活动由小猫选择',
+                cost: 200,
+                category: 'experience',
+                available: true
+            }
+        ];
+        
+        // 消息数据
+        let messages = [
+            {
+                id: 1,
+                sender: 'master',
+                content: '今天的日程已经更新，确保按时完成所有任务。',
+                timestamp: new Date(new Date().setHours(7, 30, 0, 0)),
+                read: true
+            },
+            {
+                id: 2,
+                sender: 'kitten',
+                content: '收到，主人。我会努力完成所有任务。',
+                timestamp: new Date(new Date().setHours(7, 35, 0, 0)),
+                read: true
+            },
+            {
+                id: 3,
+                sender: 'master',
+                content: '别忘了今天的特别任务：发送照片。我期待看到你的状态。',
+                timestamp: new Date(new Date().setHours(10, 15, 0, 0)),
+                read: false
+            }
+        ];
+        
+        // 当前查看的任务或规则
+        let currentTaskId = null;
+        let currentRuleId = null;
+        let currentModalType = null;
+        
+        // 根据类别获取颜色
+        function getCategoryColor(category) {
+            switch(category) {
+                case 'routine': return 'bg-blue-100 text-blue-800';
+                case 'work': return 'bg-purple-100 text-purple-800';
+                case 'health': return 'bg-green-100 text-green-800';
+                case 'growth': return 'bg-yellow-100 text-yellow-800';
+                case 'connection': return 'bg-pink-100 text-pink-800';
+                case 'communication': return 'bg-indigo-100 text-indigo-800';
+                case 'obedience': return 'bg-red-100 text-red-800';
+                case 'freedom': return 'bg-teal-100 text-teal-800';
+                case 'attention': return 'bg-orange-100 text-orange-800';
+                case 'gift': return 'bg-amber-100 text-amber-800';
+                case 'experience': return 'bg-lime-100 text-lime-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+        
+        // 根据优先级获取样式
+        function getPriorityStyle(priority) {
+            switch(priority) {
+                case 'high': return 'border-l-4 border-red-500';
+                case 'medium': return 'border-l-4 border-yellow-500';
+                case 'low': return 'border-l-4 border-green-500';
+                default: return '';
+            }
+        }
+        
+        // 格式化日期
+        function formatDate(date) {
+            return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+        }
+        
+        // 格式化时间
+        function formatTime(date) {
+            return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        }
+        
+        // 格式化日期时间
+        function formatDateTime(date) {
+            return `${formatDate(date)} ${formatTime(date)}`;
+        }
+        
+        // 是否是同一天
+        function isSameDay(date1, date2) {
+            return date1.getFullYear() === date2.getFullYear() &&
+                   date1.getMonth() === date2.getMonth() &&
+                   date1.getDate() === date2.getDate();
+        }
+        
+        // 获取当前选择日期的事件
+        function getEventsForSelectedDate() {
+            return events.filter(event => isSameDay(event.date, selectedDate));
+        }
+        
+        // 渲染日历
+        function renderCalendar() {
+            // 更新月份显示
+            document.getElementById('currentMonth').textContent = `${selectedDate.getFullYear()}年${selectedDate.getMonth() + 1}月`;
+            
+            // 计算日历网格
+            const firstDayOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+            const lastDayOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
+            const daysInMonth = lastDayOfMonth.getDate();
+            const firstDayOfWeek = firstDayOfMonth.getDay(); // 0 for Sunday
+            
+            // 创建日历单元格
+            const calendarDays = document.getElementById('calendarDays');
+            calendarDays.innerHTML = '';
+            
+            // 添加月初前的空白单元格
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'p-2';
+                calendarDays.appendChild(emptyCell);
+            }
+            
+            // 添加日期单元格
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day);
+                const dayCell = document.createElement('div');
+                
+                // 检查是否是今天
+                const isToday = isSameDay(date, new Date());
+                
+                // 检查是否是选中的日期
+                const isSelected = isSameDay(date, selectedDate);
+                
+                // 检查该日期是否有事件
+                const hasEvents = events.some(event => isSameDay(event.date, date));
+                
+                // 设置单元格类
+                dayCell.className = `day-cell p-2 border rounded cursor-pointer transition-colors
+                    ${isToday ? 'day-today' : ''}
+                    ${isSelected ? 'day-selected' : 'hover:bg-purple-50'}
+                    ${hasEvents ? 'day-has-events' : ''}`;
+                
+                // 添加日期
+                dayCell.innerHTML = `<div class="text-center">${day}</div>`;
+                if (hasEvents) {
+                    const eventIndicator = document.createElement('div');
+                    eventIndicator.className = 'w-2 h-2 bg-purple-700 rounded-full mx-auto mt-1';
+                    dayCell.appendChild(eventIndicator);
+                }
+                
+                // 添加点击事件
+                dayCell.addEventListener('click', () => {
+                    // 移除之前选中日期的选中状态
+                    document.querySelectorAll('.day-selected').forEach(cell => {
+                        cell.classList.remove('day-selected');
+                        cell.classList.add('hover:bg-purple-50');
+                    });
+                    
+                    // 设置新的选中日期
+                    dayCell.classList.add('day-selected');
+                    dayCell.classList.remove('hover:bg-purple-50');
+                    
+                    // 更新选中日期
+                    selectedDate = date;
+                    
+                    // 更新日期显示
+                    document.getElementById('selectedDate').textContent = `${formatDate(selectedDate)} 的日程`;
+                    
+                    // 渲染该日期的事件
+                    renderEventsForDay();
+                });
+                
+                calendarDays.appendChild(dayCell);
+            }
+            
+            // 更新选中日期显示
+            document.getElementById('selectedDate').textContent = `${formatDate(selectedDate)} 的日程`;
+            
+            // 渲染选中日期的事件
+            renderEventsForDay();
+        }
+        
+        // 渲染选中日期的事件
+        function renderEventsForDay() {
+            const eventsContainer = document.getElementById('eventsForDay');
+            eventsContainer.innerHTML = '';
+            
+            const eventsForDay = getEventsForSelectedDate();
+            
+            if (eventsForDay.length > 0) {
+                eventsForDay.forEach(event => {
+                    const eventElement = document.createElement('div');
+                    eventElement.className = 'event-item p-3 bg-white rounded-lg shadow border-l-4 border-purple-500';
+                    
+                    eventElement.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-medium">${event.title}</h4>
+                                <p class="text-sm text-gray-600">${formatTime(event.date)}</p>
+                                <p class="text-sm mt-1">${event.description}</p>
+                                <div class="mt-2">
+                                    <span class="text-xs px-2 py-1 rounded ${getCategoryColor(event.category)}">
+                                        ${event.category}
+                                    </span>
+                                    <span class="text-xs ml-2 text-gray-500">
+                                        由${event.setBy === 'master' ? '主人' : '小猫'}设定
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            ${currentUser === 'kitten' && event.setBy === 'master' && event.status === 'pending' ? `
+                                <button class="complete-event-btn text-green-600 hover:text-green-800" data-id="${event.id}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </button>
+                            ` : ''}
+                            
+                            ${currentUser === 'master' ? `
+                                <div class="flex space-x-2">
+                                    <button class="edit-event-btn text-blue-600 hover:text-blue-800" data-id="${event.id}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <button class="delete-event-btn text-red-600 hover:text-red-800" data-id="${event.id}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    eventsContainer.appendChild(eventElement);
+                });
+            } else {
+                eventsContainer.innerHTML = '<p class="text-gray-500 italic">今天没有安排</p>';
+            }
+            
+            // 添加事件按钮显示控制
+            document.getElementById('addEventBtn').style.display = currentUser === 'kitten' ? 'none' : 'flex';
+        }
+        
+        // 渲染任务列表
+        function renderTasks() {
+            const pendingTasks = tasks.filter(task => !task.completed);
+            const completedTasks = tasks.filter(task => task.completed);
+            
+            // 更新任务计数
+            document.getElementById('pendingTaskCount').textContent = pendingTasks.length;
+            document.getElementById('completedTaskCount').textContent = completedTasks.length;
+            
+            // 渲染待完成任务
+            const pendingTasksContainer = document.getElementById('pendingTasks');
+            pendingTasksContainer.innerHTML = '';
+            
+            if (pendingTasks.length > 0) {
+                pendingTasks.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = `task-item p-3 bg-white rounded-lg shadow cursor-pointer hover:bg-purple-50 ${getPriorityStyle(task.priority)}`;
+                    taskElement.dataset.id = task.id;
+                    
+                    taskElement.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-medium">${task.title}</h4>
+                                <p class="text-sm text-gray-600">
+                                    截止: ${formatDateTime(task.deadline)}
+                                </p>
+                                <div class="mt-2 flex items-center">
+                                    <span class="text-xs px-2 py-1 rounded ${getCategoryColor(task.category)}">
+                                        ${task.category}
+                                    </span>
+                                    <span class="text-xs ml-2 text-gray-500">
+                                        ${task.points} 积分
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            ${currentUser === 'kitten' ? `
+                                <button class="complete-task-btn text-green-600 hover:text-green-800 p-1 rounded-full hover:bg-green-100" data-id="${task.id}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </button>
+                            ` : ''}
+                            
+                            ${currentUser === 'master' ? `
+                                <div class="flex space-x-2">
+                                    <button class="edit-task-btn text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100" data-id="${task.id}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <button class="delete-task-btn text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100" data-id="${task.id}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    // 添加点击事件以查看任务详情
+                    taskElement.addEventListener('click', (e) => {
+                        // 如果点击的是按钮，不显示详情
+                        if (e.target.closest('button')) return;
+                        
+                        // 显示任务详情
+                        showTaskDetails(task.id);
+                    });
+                    
+                    pendingTasksContainer.appendChild(taskElement);
+                });
+            } else {
+                pendingTasksContainer.innerHTML = '<p class="text-gray-500 italic">没有待完成的任务</p>';
+            }
+            
+            // 渲染已完成任务
+            const completedTasksContainer = document.getElementById('completedTasks');
+            completedTasksContainer.innerHTML = '';
+            
+            if (completedTasks.length > 0) {
+                completedTasks.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = 'task-item p-3 bg-gray-50 rounded-lg border border-gray-200 opacity-75 cursor-pointer';
+                    taskElement.dataset.id = task.id;
+                    
+                    taskElement.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-medium line-through">${task.title}</h4>
+                                <p class="text-sm text-gray-500">
+                                    已完成
+                                </p>
+                                <div class="mt-2">
+                                    <span class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700">
+                                        ${task.category}
+                                    </span>
+                                    <span class="text-xs ml-2 text-gray-500">
+                                        +${task.points} 积分
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            ${currentUser === 'kitten' ? `
+                                <button class="uncomplete-task-btn text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-200" data-id="${task.id}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    // 添加点击事件以查看任务详情
+                    taskElement.addEventListener('click', (e) => {
+                        // 如果点击的是按钮，不显示详情
+                        if (e.target.closest('button')) return;
+                        
+                        // 显示任务详情
+                        showTaskDetails(task.id);
+                    });
+                    
+                    completedTasksContainer.appendChild(taskElement);
+                });
+            } else {
+                completedTasksContainer.innerHTML = '<p class="text-gray-500 italic">没有完成的任务</p>';
+            }
+            
+            // 添加任务按钮显示控制
+            document.getElementById('addTaskBtn').style.display = currentUser === 'master' ? 'flex' : 'none';
+        }
+        
+        // 渲染规则列表
+        function renderRules() {
+            const rulesContainer = document.getElementById('rulesList');
+            rulesContainer.innerHTML = '';
+            
+            rules.forEach(rule => {
+                const ruleElement = document.createElement('div');
+                ruleElement.className = 'rule-item p-3 bg-white rounded-lg shadow cursor-pointer hover:bg-purple-50';
+                ruleElement.dataset.id = rule.id;
+                
+                ruleElement.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-medium">${rule.title}</h4>
+                            <p class="text-sm mt-1">${rule.description}</p>
+                            <div class="mt-2 flex items-center">
+                                <span class="text-xs px-2 py-1 rounded ${getCategoryColor(rule.category)}">
+                                    ${rule.category}
+                                </span>
+                                <span class="text-xs ml-2 px-2 py-1 rounded ${
+                                    rule.importance === 'essential' ? 'bg-red-100 text-red-800' : 
+                                    rule.importance === 'high' ? 'bg-orange-100 text-orange-800' : 
+                                    'bg-yellow-100 text-yellow-800'
+                                }">
+                                    ${rule.importance === 'essential' ? '必要' : 
+                                     rule.importance === 'high' ? '重要' : '标准'}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        ${currentUser === 'master' ? `
+                            <div class="flex space-x-2">
+                                <button class="edit-rule-btn text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100" data-id="${rule.id}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                <button class="delete-rule-btn text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100" data-id="${rule.id}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                // 添加点击事件以查看规则详情
+                ruleElement.addEventListener('click', (e) => {
+                    // 如果点击的是按钮，不显示详情
+                    if (e.target.closest('button')) return;
+                    
+                    // 显示规则详情
+                    showRuleDetails(rule.id);
+                });
+                
+                rulesContainer.appendChild(ruleElement);
+            });
+            
+            // 添加规则按钮显示控制
+            document.getElementById('masterOnlyRuleBtn').style.display = currentUser === 'master' ? 'block' : 'none';
+        }
+        
+        // 渲染奖励列表
+        function renderRewards() {
+            // 更新积分显示
+            document.getElementById('pointsDisplay').textContent = points;
+            
+            const rewardsContainer = document.getElementById('rewardsList');
+            rewardsContainer.innerHTML = '';
+            
+            rewards.forEach(reward => {
+                const rewardElement = document.createElement('div');
+                rewardElement.className = 'reward-item p-4 bg-white rounded-lg shadow border border-purple-200';
+                
+                rewardElement.innerHTML = `
+                    <h4 class="font-medium text-lg">${reward.title}</h4>
+                    <p class="text-sm mt-1">${reward.description}</p>
+                    <div class="mt-3 flex items-center justify-between">
+                        <span class="text-xs px-2 py-1 rounded ${getCategoryColor(reward.category)}">
+                            ${reward.category}
+                        </span>
+                        <span class="font-medium text-purple-800">
+                            ${reward.cost} 积分
+                        </span>
+                    </div>
+                    
+                    ${currentUser === 'kitten' ? `
+                        <div class="mt-3">
+                            <button 
+                                class="claim-reward-btn w-full py-2 rounded-lg transition-colors ${
+                                    points >= reward.cost && reward.available
+                                        ? 'bg-purple-600 text-white hover:bg-purple-700'
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                }"
+                                data-id="${reward.id}"
+                                ${points < reward.cost || !reward.available ? 'disabled' : ''}
+                            >
+                                ${points >= reward.cost ? '兑换奖励' : `还需 ${reward.cost - points} 积分`}
+                            </button>
+                        </div>
+                    ` : ''}
+                    
+                    ${currentUser === 'master' ? `
+                        <div class="mt-3 flex space-x-2">
+                            <button 
+                                class="edit-reward-btn flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                data-id="${reward.id}"
+                            >
+                                编辑
+                            </button>
+                            <button 
+                                class="delete-reward-btn flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                                data-id="${reward.id}"
+                            >
+                                移除
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+                
+                rewardsContainer.appendChild(rewardElement);
+            });
+            
+            // 添加奖励按钮显示控制
+            document.getElementById('masterOnlyRewardBtn').style.display = currentUser === 'master' ? 'block' : 'none';
+        }
+        
+        // 渲染消息列表
+        function renderMessages() {
+            const messageList = document.getElementById('messageList');
+            messageList.innerHTML = '';
+            
+            messages.forEach(message => {
+                const messageElement = document.createElement('div');
+                messageElement.className = `p-2 rounded-lg ${
+                    message.sender === currentUser
+                        ? 'bg-purple-100 ml-8'
+                        : 'bg-gray-100 mr-8'
+                } ${!message.read && message.sender !== currentUser ? 'border-l-4 border-purple-500' : ''}`;
+                
+                messageElement.innerHTML = `
+                    <p class="text-sm">${message.content}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        ${message.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    </p>
+                `;
+                
+                messageList.appendChild(messageElement);
+                
+                // 标记为已读
+                if (message.sender !== currentUser && !message.read) {
+                    message.read = true;
+                }
+            });
+            
+            // 更新未读消息状态
+            updateUnreadBadge();
+        }
+        
+        // 更新未读消息徽章
+        function updateUnreadBadge() {
+            const unreadBadge = document.getElementById('unreadBadge');
+            const hasUnread = messages.some(msg => !msg.read && msg.sender !== currentUser);
+            
+            if (hasUnread) {
+                unreadBadge.classList.remove('hidden');
+            } else {
+                unreadBadge.classList.add('hidden');
+            }
+        }
+        
+        // 显示任务详情
+        function showTaskDetails(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            currentTaskId = taskId;
+            
+            // 填充任务详情
+            document.getElementById('taskDetailsTitle').textContent = task.title;
+            document.getElementById('taskDetailsDescription').textContent = task.description;
+            document.getElementById('taskDetailsCategory').textContent = task.category;
+            document.getElementById('taskDetailsCategory').className = `text-xs px-2 py-1 rounded ${getCategoryColor(task.category)}`;
+            
+            document.getElementById('taskDetailsPriority').textContent = 
+                task.priority === 'high' ? '高' : 
+                task.priority === 'medium' ? '中' : '低';
+            document.getElementById('taskDetailsPriority').className = `text-xs px-2 py-1 rounded ${
+                task.priority === 'high' ? 'bg-red-100 text-red-800' : 
+                task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
+                'bg-green-100 text-green-800'
+            }`;
+            
+            document.getElementById('taskDetailsSetter').textContent = task.setBy === 'master' ? '主人' : '小猫';
+            document.getElementById('taskDetailsDeadline').textContent = formatDateTime(task.deadline);
+            document.getElementById('taskDetailsPoints').textContent = task.points;
+            
+            document.getElementById('taskDetailsStatus').textContent = task.completed ? '已完成' : '待完成';
+            document.getElementById('taskDetailsStatus').className = task.completed ? 'text-green-600' : 'text-yellow-600';
+            
+            // 显示/隐藏小猫操作按钮
+            const kittenActions = document.getElementById('kittenTaskActions');
+            if (currentUser === 'kitten' && !task.completed) {
+                kittenActions.classList.remove('hidden');
+                document.getElementById('completeTaskBtn').onclick = () => completeTask(taskId);
+            } else {
+                kittenActions.classList.add('hidden');
+            }
+            
+            // 显示模态框
+            document.getElementById('taskDetailsModal').style.display = 'block';
+        }
+        
+        // 显示规则详情
+        function showRuleDetails(ruleId) {
+            const rule = rules.find(r => r.id === ruleId);
+            if (!rule) return;
+            
+            currentRuleId = ruleId;
+            
+            // 填充规则详情
+            document.getElementById('ruleDetailsTitle').textContent = rule.title;
+            document.getElementById('ruleDetailsDescription').textContent = rule.description;
+            document.getElementById('ruleDetailsCategory').textContent = rule.category;
+            document.getElementById('ruleDetailsCategory').className = `text-xs px-2 py-1 rounded ${getCategoryColor(rule.category)}`;
+            
+            document.getElementById('ruleDetailsImportance').textContent = 
+                rule.importance === 'essential' ? '必要' : 
+                rule.importance === 'high' ? '重要' : '标准';
+            document.getElementById('ruleDetailsImportance').className = `text-xs px-2 py-1 rounded ${
+                rule.importance === 'essential' ? 'bg-red-100 text-red-800' : 
+                rule.importance === 'high' ? 'bg-orange-100 text-orange-800' : 
+                'bg-yellow-100 text-yellow-800'
+            }`;
+            
+            document.getElementById('ruleDetailsConsequence').textContent = rule.consequence;
+            
+            // 显示模态框
+            document.getElementById('ruleDetailsModal').style.display = 'block';
+        }
+        
+        // 完成任务
+        function completeTask(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            task.completed = true;
+            points += task.points;
+            
+            // 添加完成任务的消息
+            messages.push({
+                id: messages.length + 1,
+                sender: 'kitten',
+                content: `我完成了任务：${task.title}`,
+                timestamp: new Date(),
+                read: false
+            });
+            
+            // 添加主人的自动回复
+            setTimeout(() => {
+                messages.push({
+                    id: messages.length + 1,
+                    sender: 'master',
+                    content: `做得好！你获得了 ${task.points} 积分作为奖励。`,
+                    timestamp: new Date(),
+                    read: false
+                });
+                
+                // 更新未读消息状态
+                updateUnreadBadge();
+            }, 1000);
+            
+            // 关闭模态框
+            document.getElementById('taskDetailsModal').style.display = 'none';
+            
+            // 更新任务列表
+            renderTasks();
+            
+            // 更新积分显示
+            document.getElementById('pointsDisplay').textContent = points;
+        }
+        
+        // 取消完成任务
+        function uncompleteTask(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            task.completed = false;
+            points = Math.max(0, points - task.points);
+            
+            // 更新任务列表
+            renderTasks();
+            
+            // 更新积分显示
+            document.getElementById('pointsDisplay').textContent = points;
+        }
+        
+        // 兑换奖励
+        function claimReward(rewardId) {
+            const reward = rewards.find(r => r.id === rewardId);
+            if (!reward) return;
+            
+            if (points >= reward.cost) {
+                points -= reward.cost;
+                
+                // 添加兑换奖励的消息
+                messages.push({
+                    id: messages.length + 1,
+                    sender: 'kitten',
+                    content: `我兑换了奖励：${reward.title}`,
+                    timestamp: new Date(),
+                    read: false
+                });
+                
+                // 添加主人的自动回复
+                setTimeout(() => {
+                    messages.push({
+                        id: messages.length + 1,
+                        sender: 'master',
+                        content: `你的兑换已确认。奖励：${reward.title} 将会在合适的时间兑现。`,
+                        timestamp: new Date(),
+                        read: false
+                    });
+                    
+                    // 更新未读消息状态
+                    updateUnreadBadge();
+                }, 1000);
+                
+                // 更新奖励列表
+                renderRewards();
+                
+                // 更新积分显示
+                document.getElementById('pointsDisplay').textContent = points;
+                
+                // 显示成功消息
+                alert(`成功兑换奖励：${reward.title}`);
+            } else {
+                alert('积分不足，无法兑换此奖励');
+            }
+        }
+        
+        // 发送消息
+        function sendMessage() {
+            const input = document.getElementById('newMessageInput');
+            const content = input.value.trim();
+            
+            if (content) {
+                messages.push({
+                    id: messages.length + 1,
+                    sender: currentUser,
+                    content: content,
+                    timestamp: new Date(),
+                    read: false
+                });
+                
+                // 清空输入框
+                input.value = '';
+                
+                // 更新消息列表
+                renderMessages();
+                
+                // 添加主人的自动回复
+                if (currentUser === 'kitten') {
+                    setTimeout(() => {
+                        const replies = [
+                            "收到了，我的小猫。期待你的表现。",
+                            "谢谢你的信息。继续保持这样的沟通。",
+                            "我会关注你的进度。记得完成今天的任务。",
+                            "好的，记录下来了。有任何问题随时告诉我。",
+                            "我很高兴收到你的消息。继续努力。"
+                        ];
+                        
+                        const randomReply = replies[Math.floor(Math.random() * replies.length)];
+                        
+                        messages.push({
+                            id: messages.length + 1,
+                            sender: 'master',
+                            content: randomReply,
+                            timestamp: new Date(),
+                            read: false
+                        });
+                        
+                        // 更新消息列表
+                        renderMessages();
+                        
+                        // 更新未读消息状态
+                        updateUnreadBadge();
+                    }, 1500);
+                }
+            }
+        }
+        
+        // 切换用户类型
+        function toggleUserType() {
+            currentUser = currentUser === 'master' ? 'kitten' : 'master';
+            document.getElementById('currentRole').textContent = currentUser === 'master' ? '主人' : '小猫';
+            
+            // 更新用户特定视图
+            updateUserSpecificViews();
+            
+            // 重新渲染当前视图
+            renderCurrentView();
+        }
+        
+        // 更新用户特定视图
+        function updateUserSpecificViews() {
+            // 添加按钮显示控制
+            document.getElementById('addEventBtn').style.display = currentUser === 'master' ? 'flex' : 'none';
+            document.getElementById('addTaskBtn').style.display = currentUser === 'master' ? 'flex' : 'none';
+            document.getElementById('masterOnlyRuleBtn').style.display = currentUser === 'master' ? 'block' : 'none';
+            document.getElementById('masterOnlyRewardBtn').style.display = currentUser === 'master' ? 'block' : 'none';
+        }
+        
+        // 显示添加项目模态框
+        function showAddItemModal(type) {
+            currentModalType = type;
+            
+            // 设置模态框标题
+            const titleMap = {
+                'event': '添加新日程',
+                'task': '添加新任务',
+                'rule': '添加新规则',
+                'reward': '添加新奖励'
+            };
+            
+            document.getElementById('addItemTitle').textContent = titleMap[type];
+            
+            // 隐藏所有特定字段
+            document.getElementById('eventFields').classList.add('hidden');
+            document.getElementById('taskFields').classList.add('hidden');
+            document.getElementById('ruleFields').classList.add('hidden');
+            document.getElementById('rewardFields').classList.add('hidden');
+            
+            // 显示特定类型的字段
+            document.getElementById(`${type}Fields`).classList.remove('hidden');
+            
+            // 设置默认值
+            document.getElementById('newItemTitle').value = '';
+            document.getElementById('newItemDescription').value = '';
+            document.getElementById('newItemCategory').value = 'general';
+            
+            // 设置特定类型的默认值
+            if (type === 'event') {
+                const now = new Date();
+                const dateTimeStr = now.toISOString().slice(0, 16);
+                document.getElementById('newEventDateTime').value = dateTimeStr;
+            } else if (type === 'task') {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const dateTimeStr = tomorrow.toISOString().slice(0, 16);
+                document.getElementById('newTaskDeadline').value = dateTimeStr;
+                document.getElementById('newTaskPriority').value = 'medium';
+                document.getElementById('newTaskPoints').value = '5';
+            } else if (type === 'rule') {
+                document.getElementById('newRuleImportance').value = 'standard';
+                document.getElementById('newRuleConsequence').value = '';
+            } else if (type === 'reward') {
+                document.getElementById('newRewardCost').value = '50';
+            }
+            
+            // 显示模态框
+            document.getElementById('addItemModal').style.display = 'block';
+        }
+        
+        // 添加新项目
+        function addNewItem() {
+            const title = document.getElementById('newItemTitle').value.trim();
+            const description = document.getElementById('newItemDescription').value.trim();
+            const category = document.getElementById('newItemCategory').value;
+            
+            if (!title) {
+                alert('请输入标题');
+                return;
+            }
+            
+            // 根据类型添加不同的项目
+            if (currentModalType === 'event') {
+                const dateTimeStr = document.getElementById('newEventDateTime').value;
+                const date = new Date(dateTimeStr);
+                
+                if (!dateTimeStr) {
+                    alert('请选择日期和时间');
+                    return;
+                }
+                
+                const newEvent = {
+                    id: events.length + 1,
+                    title: title,
+                    date: date,
+                    description: description,
+                    status: 'pending',
+                    category: category,
+                    setBy: currentUser,
+                    feedback: '',
+                    approved: false
+                };
+                
+                events.push(newEvent);
+                
+                // 通知
+                if (currentUser === 'master') {
+                    messages.push({
+                        id: messages.length + 1,
+                        sender: 'master',
+                        content: `新日程已添加：${title}`,
+                        timestamp: new Date(),
+                        read: false
+                    });
+                    
+                    // 更新未读消息状态
+                    updateUnreadBadge();
+                }
+                
+                // 重新渲染日历
+                renderCalendar();
+            } else if (currentModalType === 'task') {
+                const deadlineStr = document.getElementById('newTaskDeadline').value;
+                const deadline = new Date(deadlineStr);
+                const priority = document.getElementById('newTaskPriority').value;
+                const points = parseInt(document.getElementById('newTaskPoints').value);
+                
+                if (!deadlineStr) {
+                    alert('请选择截止日期');
+                    return;
+                }
+                
+                const newTask = {
+                    id: tasks.length + 1,
+                    title: title,
+                    description: description,
+                    priority: priority,
+                    deadline: deadline,
+                    completed: false,
+                    setBy: currentUser,
+                    category: category,
+                    points: points
+                };
+                
+                tasks.push(newTask);
+                
+                // 通知
+                if (currentUser === 'master') {
+                    messages.push({
+                        id: messages.length + 1,
+                        sender: 'master',
+                        content: `新任务已添加：${title}`,
+                        timestamp: new Date(),
+                        read: false
+                    });
+                    
+                    // 更新未读消息状态
+                    updateUnreadBadge();
+                }
+                
+                // 重新渲染任务列表
+                renderTasks();
+            } else if (currentModalType === 'rule') {
+                const importance = document.getElementById('newRuleImportance').value;
+                const consequence = document.getElementById('newRuleConsequence').value.trim();
+                
+                if (!consequence) {
+                    alert('请输入违反后果');
+                    return;
+                }
+                
+                const newRule = {
+                    id: rules.length + 1,
+                    title: title,
+                    description: description,
+                    category: category,
+                    importance: importance,
+                    consequence: consequence
+                };
+                
+                rules.push(newRule);
+                
+                // 通知
+                if (currentUser === 'master') {
+                    messages.push({
+                        id: messages.length + 1,
+                        sender: 'master',
+                        content: `新规则已添加：${title}`,
+                        timestamp: new Date(),
+                        read: false
+                    });
+                    
+                    // 更新未读消息状态
+                    updateUnreadBadge();
+                }
+                
+                // 重新渲染规则列表
+                renderRules();
+            } else if (currentModalType === 'reward') {
+                const cost = parseInt(document.getElementById('newRewardCost').value);
+                
+                if (isNaN(cost) || cost <= 0) {
+                    alert('请输入有效的积分值');
+                    return;
+                }
+                
+                const newReward = {
+                    id: rewards.length + 1,
+                    title: title,
+                    description: description,
+                    cost: cost,
+                    category: category,
+                    available: true
+                };
+                
+                rewards.push(newReward);
+                
+                // 通知
+                if (currentUser === 'master') {
+                    messages.push({
+                        id: messages.length + 1,
+                        sender: 'master',
+                        content: `新奖励已添加：${title}`,
+                        timestamp: new Date(),
+                        read: false
+                    });
+                    
+                    // 更新未读消息状态
+                    updateUnreadBadge();
+                }
+                
+                // 重新渲染奖励列表
+                renderRewards();
+            }
+            
+            // 关闭模态框
+            document.getElementById('addItemModal').style.display = 'none';
+        }
+        
+        // 切换视图
+        function switchView(view) {
+            // 隐藏所有视图
+            document.querySelectorAll('.view-content').forEach(el => {
+                el.classList.add('hidden');
+            });
+            
+            // 移除所有导航按钮的激活状态
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('border-purple-500', 'text-purple-600');
+                btn.classList.add('border-transparent', 'hover:border-gray-300');
+            });
+            
+            // 显示选中的视图
+            document.getElementById(`${view}View`).classList.remove('hidden');
+            
+            // 激活导航按钮
+            document.querySelector(`.view-btn[data-view="${view}"]`).classList.remove('border-transparent', 'hover:border-gray-300');
+            document.querySelector(`.view-btn[data-view="${view}"]`).classList.add('border-purple-500', 'text-purple-600');
+            
+            // 更新当前视图
+            currentView = view;
+            
+            // 渲染视图内容
+            renderCurrentView();
+        }
+        
+        // 渲染当前视图
+        function renderCurrentView() {
+            switch (currentView) {
+                case 'calendar':
+                    renderCalendar();
+                    break;
+                case 'tasks':
+                    renderTasks();
+                    break;
+                case 'rules':
+                    renderRules();
+                    break;
+                case 'rewards':
+                    renderRewards();
+                    break;
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化视图
+            updateUserSpecificViews();
+            renderCurrentView();
+            
+            // 初始化未读消息状态
+            updateUnreadBadge();
+            
+            // 绑定事件处理函数
+            
+            // 导航切换
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchView(btn.dataset.view);
+                });
+            });
+            
+            // 用户类型切换
+            document.getElementById('userToggle').addEventListener('click', toggleUserType);
+            
+            // 消息面板切换
+            document.getElementById('messageToggle').addEventListener('click', () => {
+                const messagePanel = document.getElementById('messagePanel');
+                messagePanel.classList.toggle('hidden');
+                
+                if (!messagePanel.classList.contains('hidden')) {
+                    // 显示消息面板时渲染消息列表
+                    renderMessages();
+                }
+            });
+            
+            // 日历导航
+            document.getElementById('prevMonthBtn').addEventListener('click', () => {
+                selectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1);
+                renderCalendar();
+            });
+            
+            document.getElementById('nextMonthBtn').addEventListener('click', () => {
+                selectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1);
+                renderCalendar();
+            });
+            
+            // 添加按钮事件
+            document.getElementById('addEventBtn').addEventListener('click', () => showAddItemModal('event'));
+            document.getElementById('addTaskBtn').addEventListener('click', () => showAddItemModal('task'));
+            document.getElementById('addRuleBtn').addEventListener('click', () => showAddItemModal('rule'));
+            document.getElementById('addRewardBtn').addEventListener('click', () => showAddItemModal('reward'));
+            
+            // 添加项目确认按钮
+            document.getElementById('addItemBtn').addEventListener('click', addNewItem);
+            
+            // 发送消息按钮
+            document.getElementById('sendMessageBtn').addEventListener('click', sendMessage);
+            
+            // 消息输入框回车发送
+            document.getElementById('newMessageInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // 关闭模态框按钮
+            document.querySelector
+// 关闭模态框按钮
+            document.querySelectorAll('.modal-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        modal.style.display = 'none';
+                    });
+                });
+            });
+            
+            // 点击模态框外部关闭
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+            
+            // 完成任务按钮
+            document.addEventListener('click', (e) => {
+                // 完成任务
+                if (e.target.closest('.complete-task-btn')) {
+                    const taskId = parseInt(e.target.closest('.complete-task-btn').dataset.id);
+                    completeTask(taskId);
+                }
+                
+                // 取消完成任务
+                if (e.target.closest('.uncomplete-task-btn')) {
+                    const taskId = parseInt(e.target.closest('.uncomplete-task-btn').dataset.id);
+                    uncompleteTask(taskId);
+                }
+                
+                // 兑换奖励
+                if (e.target.closest('.claim-reward-btn')) {
+                    const rewardId = parseInt(e.target.closest('.claim-reward-btn').dataset.id);
+                    claimReward(rewardId);
+                }
+                
+                // 编辑任务/规则/奖励按钮（实际功能待实现）
+                if (e.target.closest('.edit-task-btn') || 
+                    e.target.closest('.edit-event-btn') || 
+                    e.target.closest('.edit-rule-btn') || 
+                    e.target.closest('.edit-reward-btn')) {
+                    alert('编辑功能正在开发中...');
+                }
+                
+                // 删除任务/规则/奖励按钮（实际功能待实现）
+                if (e.target.closest('.delete-task-btn') || 
+                    e.target.closest('.delete-event-btn') || 
+                    e.target.closest('.delete-rule-btn') || 
+                    e.target.closest('.delete-reward-btn')) {
+                    alert('删除功能正在开发中...');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
