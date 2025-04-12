@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>小猫的每日日记</title>
+    <meta name="theme-color" content="#c9a9a6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="小猫日记">
+    
+    <!-- 主屏幕图标设置 -->
+    <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22&gt;&lt;text y=%22.9em%22 font-size=%2290%22&gt;📓&lt;/text&gt;&lt;/svg&gt;">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22 style=%22background-color:%23c9a9a6%22&gt;&lt;text y=%22.9em%22 font-size=%2290%22 fill=%22white%22&gt;📓&lt;/text&gt;&lt;/svg&gt;">
     <style>
         :root {
             --primary: #c9a9a6;
@@ -286,6 +294,24 @@
             margin-bottom: 8px;
         }
     </style>
+    <!-- Web App Manifest -->
+    <link rel="manifest" href='data:application/manifest+json,{
+      "name": "小猫的每日日记",
+      "short_name": "小猫日记",
+      "description": "记录每一天的私密日记本",
+      "start_url": ".",
+      "display": "standalone",
+      "background_color": "#c9a9a6",
+      "theme_color": "#c9a9a6",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22 style=%22background-color:%23c9a9a6%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22 fill=%22white%22%3E📓%3C/text%3E%3C/svg%3E",
+          "sizes": "512x512",
+          "type": "image/svg+xml",
+          "purpose": "any maskable"
+        }
+      ]
+    }'>
 </head>
 <body>
     <header>
