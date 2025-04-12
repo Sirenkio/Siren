@@ -1,0 +1,646 @@
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lisa & Luke 的爱情记录簿</title>
+    <style>
+        :root {
+            --primary-color: #9333ea;
+            --primary-light: #f3e8ff;
+            --secondary-color: #ec4899;
+            --secondary-light: #fce7f3;
+            --text-dark: #374151;
+            --text-light: #6b7280;
+            --white: #ffffff;
+            --gray-light: #f9fafb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: linear-gradient(to right, #fdf2f8, #f3e8ff);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .tagline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--text-light);
+        }
+        
+        .card {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-header h2 {
+            margin-left: 10px;
+            color: var(--text-dark);
+            font-size: 1.25rem;
+        }
+        
+        .start-date-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .days-counter {
+            display: flex;
+            align-items: center;
+            background-color: var(--primary-light);
+            padding: 8px 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        
+        .days-counter span {
+            margin-left: 10px;
+            color: var(--primary-color);
+        }
+        
+        .days-counter strong {
+            font-weight: bold;
+        }
+        
+        input, select, textarea, button {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-color);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-light);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+        
+        button:hover {
+            background-color: #7e22ce;
+        }
+        
+        .memory-list {
+            background-color: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .memory-list-header {
+            background-color: var(--primary-light);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .memory-list-header h2 {
+            margin-left: 10px;
+            color: var(--text-dark);
+            font-size: 1.25rem;
+        }
+        
+        .empty-state {
+            padding: 30px;
+            text-align: center;
+            color: var(--text-light);
+        }
+        
+        .memory-item {
+            padding: 20px;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background-color 0.2s;
+        }
+        
+        .memory-item:hover {
+            background-color: var(--secondary-light);
+        }
+        
+        .memory-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .memory-content {
+            display: flex;
+        }
+        
+        .memory-icon {
+            margin-right: 15px;
+            margin-top: 3px;
+        }
+        
+        .memory-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .memory-meta {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+        
+        .memory-description {
+            color: var(--text-dark);
+            white-space: pre-line;
+        }
+        
+        .memory-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .icon-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .edit-btn {
+            color: #3b82f6;
+        }
+        
+        .edit-btn:hover {
+            color: #2563eb;
+        }
+        
+        .delete-btn {
+            color: #ef4444;
+        }
+        
+        .delete-btn:hover {
+            color: #dc2626;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .start-date-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .days-counter {
+                margin-top: 15px;
+            }
+        }
+        
+        /* 图标样式 */
+        .icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            stroke-width: 0;
+            stroke: currentColor;
+            fill: currentColor;
+        }
+        
+        .icon-heart {
+            color: var(--secondary-color);
+        }
+        
+        .icon-calendar {
+            color: #3b82f6;
+        }
+        
+        .icon-pencil {
+            color: var(--primary-color);
+        }
+        
+        .icon-trash {
+            color: #ef4444;
+        }
+        
+        .icon-clock {
+            color: var(--primary-color);
+        }
+        
+        .icon-gift {
+            color: #8b5cf6;
+        }
+        
+        .icon-star {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Lisa & Luke 的爱情记录簿</h1>
+            <div class="tagline">
+                <svg class="icon icon-heart" viewBox="0 0 24 24">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <p>记录每一个特别的时刻</p>
+                <svg class="icon icon-heart" viewBox="0 0 24 24">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+            </div>
+        </header>
+        
+        <!-- 恋爱起始日设置 -->
+        <div class="card">
+            <div class="card-header">
+                <svg class="icon icon-calendar" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <h2>我们的起点</h2>
+            </div>
+            
+            <div class="start-date-container">
+                <div>
+                    <input type="date" id="start-date" class="date-input">
+                </div>
+                
+                <div id="days-together-container" class="days-counter" style="display: none;">
+                    <svg class="icon icon-clock" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span>已经在一起 <strong id="days-count">0</strong> 天</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 添加记忆表单 -->
+        <div class="card">
+            <div class="card-header">
+                <svg class="icon icon-pencil" viewBox="0 0 24 24">
+                    <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                    <path d="M2 2l7.586 7.586"></path>
+                    <circle cx="11" cy="11" r="2"></circle>
+                </svg>
+                <h2 id="form-title">添加新记忆</h2>
+            </div>
+            
+            <form id="memory-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="memory-date">日期</label>
+                        <input type="date" id="memory-date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="memory-type">类型</label>
+                        <select id="memory-type">
+                            <option value="约会">约会</option>
+                            <option value="礼物">礼物</option>
+                            <option value="纪念日">纪念日</option>
+                            <option value="特别时刻">特别时刻</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="memory-title">标题</label>
+                    <input type="text" id="memory-title" placeholder="例如：我们的第一次约会" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="memory-description">描述</label>
+                    <textarea id="memory-description" rows="3" placeholder="写下这个时刻的感受和回忆..."></textarea>
+                </div>
+                
+                <button type="submit" id="save-button">
+                    <svg class="icon" viewBox="0 0 24 24" style="margin-right: 5px;">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    <span id="button-text">保存</span>
+                </button>
+            </form>
+        </div>
+        
+        <!-- 记忆列表 -->
+        <div class="memory-list">
+            <div class="memory-list-header">
+                <svg class="icon icon-heart" viewBox="0 0 24 24">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <h2>我们的甜蜜记忆</h2>
+            </div>
+            
+            <div id="memories-container">
+                <div class="empty-state">
+                    还没有记忆，开始添加你们的第一个甜蜜时刻吧！
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM元素
+        const startDateInput = document.getElementById('start-date');
+        const daysTogetherContainer = document.getElementById('days-together-container');
+        const daysCountElement = document.getElementById('days-count');
+        const memoryForm = document.getElementById('memory-form');
+        const memoryDateInput = document.getElementById('memory-date');
+        const memoryTypeInput = document.getElementById('memory-type');
+        const memoryTitleInput = document.getElementById('memory-title');
+        const memoryDescriptionInput = document.getElementById('memory-description');
+        const memoriesContainer = document.getElementById('memories-container');
+        const formTitle = document.getElementById('form-title');
+        const saveButton = document.getElementById('save-button');
+        const buttonText = document.getElementById('button-text');
+
+        // 初始化变量
+        let memories = [];
+        let editingIndex = -1;
+
+        // 初始化当前日期
+        const today = new Date();
+        const formattedToday = today.toISOString().split('T')[0];
+        memoryDateInput.value = formattedToday;
+
+        // 载入数据
+        function loadData() {
+            const savedStartDate = localStorage.getItem('startDate');
+            const savedMemories = localStorage.getItem('memories');
+            
+            if (savedStartDate) {
+                startDateInput.value = savedStartDate;
+                updateDaysCount(savedStartDate);
+            }
+            
+            if (savedMemories) {
+                memories = JSON.parse(savedMemories);
+                renderMemories();
+            }
+        }
+
+        // 计算在一起的天数
+        function calculateDaysTogether(startDate) {
+            const start = new Date(startDate);
+            const diffTime = Math.abs(today - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        }
+
+        // 更新天数显示
+        function updateDaysCount(date) {
+            if (date) {
+                const days = calculateDaysTogether(date);
+                daysCountElement.textContent = days;
+                daysTogetherContainer.style.display = 'flex';
+            } else {
+                daysTogetherContainer.style.display = 'none';
+            }
+        }
+
+        // 保存开始日期
+        startDateInput.addEventListener('change', function(e) {
+            const date = e.target.value;
+            localStorage.setItem('startDate', date);
+            updateDaysCount(date);
+        });
+
+        // 保存记忆
+        memoryForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newMemory = {
+                date: memoryDateInput.value,
+                type: memoryTypeInput.value,
+                title: memoryTitleInput.value,
+                description: memoryDescriptionInput.value
+            };
+            
+            if (editingIndex > -1) {
+                // 更新现有记忆
+                memories[editingIndex] = newMemory;
+                editingIndex = -1;
+                formTitle.textContent = '添加新记忆';
+                buttonText.textContent = '保存';
+            } else {
+                // 添加新记忆
+                memories.push(newMemory);
+            }
+            
+            // 保存到本地存储
+            localStorage.setItem('memories', JSON.stringify(memories));
+            
+            // 重置表单
+            memoryForm.reset();
+            memoryDateInput.value = formattedToday;
+            
+            // 重新渲染记忆列表
+            renderMemories();
+        });
+
+        // 根据类型获取图标
+        function getTypeIcon(type) {
+            let iconPath = '';
+            let iconClass = '';
+            
+            switch(type) {
+                case '约会':
+                    iconPath = '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>';
+                    iconClass = 'icon-heart';
+                    break;
+                case '礼物':
+                    iconPath = '<path d="M20 12v10H4V12"></path><path d="M2 7h20v5H2z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>';
+                    iconClass = 'icon-gift';
+                    break;
+                case '纪念日':
+                    iconPath = '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>';
+                    iconClass = 'icon-calendar';
+                    break;
+                case '特别时刻':
+                    iconPath = '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>';
+                    iconClass = 'icon-star';
+                    break;
+                default:
+                    iconPath = '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>';
+                    iconClass = 'icon-heart';
+            }
+            
+            return `<svg class="icon ${iconClass}" viewBox="0 0 24 24">${iconPath}</svg>`;
+        }
+
+        // 渲染记忆列表
+        function renderMemories() {
+            if (memories.length === 0) {
+                memoriesContainer.innerHTML = '<div class="empty-state">还没有记忆，开始添加你们的第一个甜蜜时刻吧！</div>';
+                return;
+            }
+            
+            // 按日期排序（最新的在前面）
+            const sortedMemories = [...memories].sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
+            
+            let html = '';
+            
+            sortedMemories.forEach((memory, index) => {
+                const date = new Date(memory.date);
+                const formattedDate = date.toLocaleDateString('zh-CN');
+                
+                html += `
+                    <div class="memory-item">
+                        <div class="memory-header">
+                            <div class="memory-content">
+                                <div class="memory-icon">
+                                    ${getTypeIcon(memory.type)}
+                                </div>
+                                <div>
+                                    <h3 class="memory-title">${memory.title}</h3>
+                                    <div class="memory-meta">${formattedDate} · ${memory.type}</div>
+                                    <p class="memory-description">${memory.description}</p>
+                                </div>
+                            </div>
+                            <div class="memory-actions">
+                                <button class="icon-button edit-btn" onclick="editMemory(${index})">
+                                    <svg class="icon" viewBox="0 0 24 24">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                                <button class="icon-button delete-btn" onclick="deleteMemory(${index})">
+                                    <svg class="icon" viewBox="0 0 24 24">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            memoriesContainer.innerHTML = html;
+        }
+
+        // 编辑记忆
+        function editMemory(index) {
+            const memory = memories[index];
+            
+            memoryDateInput.value = memory.date;
+            memoryTypeInput.value = memory.type;
+            memoryTitleInput.value = memory.title;
+            memoryDescriptionInput.value = memory.description;
+            
+            editingIndex = index;
+            formTitle.textContent = '编辑记忆';
+            buttonText.textContent = '更新';
+            
+            // 滚动到表单位置
+            memoryForm.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 删除记忆
+        function deleteMemory(index) {
+            if (confirm('确定要删除这个记忆吗？')) {
+                memories.splice(index, 1);
+                localStorage.setItem('memories', JSON.stringify(memories));
+                renderMemories();
+                
+                // 如果正在编辑被删除的记忆，重置表单
+                if (editingIndex === index) {
+                    memoryForm.reset();
+                    memoryDateInput.value = formattedToday;
+                    editingIndex = -1;
+                    formTitle.textContent = '添加新记忆';
+                    buttonText.textContent = '保存';
+                }
+            }
+        }
+
+        // 将函数添加到全局作用域
+        window.editMemory = editMemory;
+        window.deleteMemory = deleteMemory;
+
+        // 加载数据
+        loadData();
+    </script>
+</body>
+</html>
+```
