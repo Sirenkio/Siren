@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小猫的每日日记</title>
+    <style>
+        :root {
+            --primary: #c9a9a6;
+            --primary-light: #d4b8b5;
+            --secondary: #f6eeee;
+            --dark: #333333;
+            --light: #f8f8f8;
+            --danger: #ff6b6b;
+            --success: #4CAF50;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .diary-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .diary-controls button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .diary-controls button:hover {
+            background-color: var(--primary-light);
+        }
+        
+        #delete-btn {
+            background-color: var(--danger);
+        }
+        
+        #delete-btn:hover {
+            background-color: #ff4444;
+        }
+        
+        #search-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #search-input {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            flex-grow: 1;
+        }
+        
+        .diary-content {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+        }
+        
+        .diary-entries {
+            width: 300px;
+            border-right: 1px solid #eee;
+            padding-right: 20px;
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+        
+        .entry-card {
+            padding: 15px;
+            background-color: white;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .entry-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+        
+        .entry-card.selected {
+            border-left: 4px solid var(--primary);
+        }
+        
+        .entry-card h3 {
+            margin: 0 0 5px 0;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .entry-card p {
+            margin: 0;
+            color: #888;
+            font-size: 0.8rem;
+        }
+        
+        .entry-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #entry-title {
+            font-size: 1.2rem;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        #entry-editor {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 300px;
+            resize: none;
+            width: 100%;
+            box-sizing: border-box;
+            line-height: 1.5;
+            font-family: inherit;
+        }
+        
+        #mood-selector {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        #mood-selector select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        
+        .action-btns {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        
+        #save-btn {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        #save-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .empty-state {
+            text-align: center;
+            margin-top: 100px;
+            color: #888;
+        }
+        
+        .empty-state i {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--primary);
+            color: white;
+            margin-top: 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .diary-content {
+                flex-direction: column;
+            }
+            
+            .diary-entries {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #eee;
+                padding-right: 0;
+                padding-bottom: 20px;
+                margin-bottom: 20px;
+                max-height: 200px;
+            }
+            
+            .diary-controls {
+                flex-direction: column;
+            }
+            
+            #search-container {
+                width: 100%;
+            }
+        }
+        
+        .mood-icon {
+            font-size: 1.2rem;
+            margin-right: 5px;
+        }
+        
+        .tags-container {
+            margin-bottom: 15px;
+        }
+        
+        .tags-input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            margin-top: 5px;
+        }
+        
+        .tag-hint {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .statistics {
+            background-color: var(--secondary);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .statistics h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>小猫的每日日记</h1>
+    </header>
+    
+    <div class="container">
+        <div class="statistics">
+            <h3>统计信息</h3>
+            <div class="stat-item">
+                <span>日记总数：</span>
+                <span id="total-entries">0</span>
+            </div>
+            <div class="stat-item">
+                <span>本月日记：</span>
+                <span id="month-entries">0</span>
+            </div>
+            <div class="stat-item">
+                <span>最常用心情：</span>
+                <span id="common-mood">暂无数据</span>
+            </div>
+            <div class="stat-item">
+                <span>最近一次记录：</span>
+                <span id="last-entry">暂无数据</span>
+            </div>
+        </div>
+        
+        <div class="diary-controls">
+            <button id="new-entry-btn">写新日记</button>
+            <div id="search-container">
+                <input type="text" id="search-input" placeholder="搜索日记...">
+                <button id="search-btn">搜索</button>
+            </div>
+            <button id="delete-btn">删除选中</button>
+        </div>
+        
+        <div class="diary-content">
+            <div class="diary-entries" id="entries-container">
+                <!-- 日记条目将在这里动态生成 -->
+            </div>
+            
+            <div class="entry-content">
+                <input type="text" id="entry-title" placeholder="日记标题...">
+                
+                <div id="mood-selector">
+                    <label for="mood">今日心情：</label>
+                    <select id="mood">
+                        <option value="happy">😊 开心</option>
+                        <option value="calm">😌 平静</option>
+                        <option value="sad">😢 伤心</option>
+                        <option value="angry">😠 生气</option>
+                        <option value="excited">😃 兴奋</option>
+                        <option value="tired">😴 疲惫</option>
+                        <option value="loved">💕 被爱</option>
+                        <option value="anxious">😰 焦虑</option>
+                    </select>
+                </div>
+                
+                <div class="tags-container">
+                    <label for="tags">标签：</label>
+                    <input type="text" id="tags" class="tags-input" placeholder="输入标签，用逗号分隔...">
+                    <div class="tag-hint">例如：主人，玩具，感想，回忆...</div>
+                </div>
+                
+                <textarea id="entry-editor" placeholder="今天发生了什么？有什么想法和感受..."></textarea>
+                
+                <div class="action-btns">
+                    <button id="save-btn">保存日记</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>由主人为小猫特别设计 &copy; 2025</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化变量
+            let currentEntryId = null;
+            let diaryEntries = JSON.parse(localStorage.getItem('diaryEntries')) || [];
+            
+            // DOM元素
+            const entriesContainer = document.getElementById('entries-container');
+            const entryTitle = document.getElementById('entry-title');
+            const entryEditor = document.getElementById('entry-editor');
+            const moodSelector = document.getElementById('mood');
+            const tagsInput = document.getElementById('tags');
+            const saveBtn = document.getElementById('save-btn');
+            const newEntryBtn = document.getElementById('new-entry-btn');
+            const deleteBtn = document.getElementById('delete-btn');
+            const searchInput = document.getElementById('search-input');
+            const searchBtn = document.getElementById('search-btn');
+            
+            // 统计信息元素
+            const totalEntriesEl = document.getElementById('total-entries');
+            const monthEntriesEl = document.getElementById('month-entries');
+            const commonMoodEl = document.getElementById('common-mood');
+            const lastEntryEl = document.getElementById('last-entry');
+            
+            // 初始化应用
+            initApp();
+            
+            // 初始化应用函数
+            function initApp() {
+                renderEntries();
+                updateStatistics();
+                clearEditor();
+                
+                // 如果有日记，选中第一篇
+                if (diaryEntries.length > 0) {
+                    selectEntry(diaryEntries[0].id);
+                }
+            }
+            
+            // 渲染日记列表
+            function renderEntries(entries = diaryEntries) {
+                entriesContainer.innerHTML = '';
+                
+                if (entries.length === 0) {
+                    entriesContainer.innerHTML = `
+                        <div class="empty-state">
+                            <p>还没有日记记录</p>
+                            <p>点击"写新日记"开始记录吧！</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // 按日期排序，最新的在前面
+                entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                entries.forEach(entry => {
+                    const entryDate = new Date(entry.date);
+                    const formattedDate = `${entryDate.getFullYear()}-${(entryDate.getMonth() + 1).toString().padStart(2, '0')}-${entryDate.getDate().toString().padStart(2, '0')}`;
+                    
+                    const entryCard = document.createElement('div');
+                    entryCard.className = `entry-card ${entry.id === currentEntryId ? 'selected' : ''}`;
+                    entryCard.setAttribute('data-id', entry.id);
+                    
+                    // 获取心情图标
+                    const moodIcon = getMoodIcon(entry.mood);
+                    
+                    entryCard.innerHTML = `
+                        <h3>${entry.title || '无标题日记'}</h3>
+                        <p>${moodIcon} ${formattedDate}</p>
+                    `;
+                    
+                    entryCard.addEventListener('click', () => {
+                        selectEntry(entry.id);
+                    });
+                    
+                    entriesContainer.appendChild(entryCard);
+                });
+            }
+            
+            // 获取心情图标
+            function getMoodIcon(mood) {
+                const moodIcons = {
+                    happy: '😊',
+                    calm: '😌',
+                    sad: '😢',
+                    angry: '😠',
+                    excited: '😃',
+                    tired: '😴',
+                    loved: '💕',
+                    anxious: '😰'
+                };
+                
+                return moodIcons[mood] || '😊';
+            }
+            
+            // 选择日记条目
+            function selectEntry(id) {
+                currentEntryId = id;
+                
+                // 更新选中状态
+                document.querySelectorAll('.entry-card').forEach(card => {
+                    card.classList.remove('selected');
+                    if (card.getAttribute('data-id') === id.toString()) {
+                        card.classList.add('selected');
+                    }
+                });
+                
+                // 查找并显示选中的日记
+                const selectedEntry = diaryEntries.find(entry => entry.id === id);
+                if (selectedEntry) {
+                    entryTitle.value = selectedEntry.title || '';
+                    entryEditor.value = selectedEntry.content || '';
+                    moodSelector.value = selectedEntry.mood || 'happy';
+                    tagsInput.value = selectedEntry.tags ? selectedEntry.tags.join(', ') : '';
+                }
+            }
+            
+            // 清空编辑器
+            function clearEditor() {
+                currentEntryId = null;
+                entryTitle.value = '';
+                entryEditor.value = '';
+                moodSelector.value = 'happy';
+                tagsInput.value = '';
+                
+                // 清除选中状态
+                document.querySelectorAll('.entry-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+            }
+            
+            // 保存日记
+            saveBtn.addEventListener('click', () => {
+                const title = entryTitle.value.trim();
+                const content = entryEditor.value.trim();
+                const mood = moodSelector.value;
+                const tags = tagsInput.value.split(',')
+                    .map(tag => tag.trim())
+                    .filter(tag => tag !== '');
+                
+                if (content === '') {
+                    alert('日记内容不能为空！');
+                    return;
+                }
+                
+                if (currentEntryId) {
+                    // 更新现有日记
+                    const entryIndex = diaryEntries.findIndex(entry => entry.id === currentEntryId);
+                    if (entryIndex !== -1) {
+                        diaryEntries[entryIndex] = {
+                            ...diaryEntries[entryIndex],
+                            title,
+                            content,
+                            mood,
+                            tags,
+                            updatedAt: new Date().toISOString()
+                        };
+                    }
+                } else {
+                    // 创建新日记
+                    const newEntry = {
+                        id: Date.now(),
+                        title,
+                        content,
+                        mood,
+                        tags,
+                        date: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+                    
+                    diaryEntries.unshift(newEntry);
+                    currentEntryId = newEntry.id;
+                }
+                
+                // 保存到本地存储
+                localStorage.setItem('diaryEntries', JSON.stringify(diaryEntries));
+                
+                // 重新渲染列表并选中当前日记
+                renderEntries();
+                updateStatistics();
+                selectEntry(currentEntryId);
+                
+                alert('日记保存成功！');
+            });
+            
+            // 创建新日记
+            newEntryBtn.addEventListener('click', clearEditor);
+            
+            // 删除日记
+            deleteBtn.addEventListener('click', () => {
+                if (!currentEntryId) {
+                    alert('请先选择要删除的日记！');
+                    return;
+                }
+                
+                if (confirm('确定要删除选中的日记吗？此操作不可恢复！')) {
+                    diaryEntries = diaryEntries.filter(entry => entry.id !== currentEntryId);
+                    localStorage.setItem('diaryEntries', JSON.stringify(diaryEntries));
+                    
+                    clearEditor();
+                    renderEntries();
+                    updateStatistics();
+                    
+                    alert('日记已删除！');
+                }
+            });
+            
+            // 搜索日记
+            searchBtn.addEventListener('click', () => {
+                const searchTerm = searchInput.value.trim().toLowerCase();
+                
+                if (searchTerm === '') {
+                    renderEntries();
+                    return;
+                }
+                
+                const filteredEntries = diaryEntries.filter(entry => {
+                    const titleMatch = entry.title.toLowerCase().includes(searchTerm);
+                    const contentMatch = entry.content.toLowerCase().includes(searchTerm);
+                    const tagMatch = entry.tags && entry.tags.some(tag => 
+                        tag.toLowerCase().includes(searchTerm)
+                    );
+                    
+                    return titleMatch || contentMatch || tagMatch;
+                });
+                
+                renderEntries(filteredEntries);
+                
+                if (filteredEntries.length === 0) {
+                    entriesContainer.innerHTML = `
+                        <div class="empty-state">
+                            <p>没有找到匹配的日记</p>
+                        </div>
+                    `;
+                }
+            });
+            
+            // 搜索框按Enter键触发搜索
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchBtn.click();
+                }
+            });
+            
+            // 更新统计信息
+            function updateStatistics() {
+                totalEntriesEl.textContent = diaryEntries.length;
+                
+                // 本月日记数
+                const currentMonth = new Date().getMonth();
+                const currentYear = new Date().getFullYear();
+                const monthEntries = diaryEntries.filter(entry => {
+                    const entryDate = new Date(entry.date);
+                    return entryDate.getMonth() === currentMonth && 
+                           entryDate.getFullYear() === currentYear;
+                });
+                monthEntriesEl.textContent = monthEntries.length;
+                
+                // 最常用心情
+                if (diaryEntries.length > 0) {
+                    const moodCount = {};
+                    diaryEntries.forEach(entry => {
+                        moodCount[entry.mood] = (moodCount[entry.mood] || 0) + 1;
+                    });
+                    
+                    let commonMood = Object.keys(moodCount)[0];
+                    let maxCount = moodCount[commonMood];
+                    
+                    for (const mood in moodCount) {
+                        if (moodCount[mood] > maxCount) {
+                            maxCount = moodCount[mood];
+                            commonMood = mood;
+                        }
+                    }
+                    
+                    const moodNames = {
+                        happy: '开心',
+                        calm: '平静',
+                        sad: '伤心',
+                        angry: '生气',
+                        excited: '兴奋',
+                        tired: '疲惫',
+                        loved: '被爱',
+                        anxious: '焦虑'
+                    };
+                    
+                    commonMoodEl.textContent = `${getMoodIcon(commonMood)} ${moodNames[commonMood]}`;
+                }
+                
+                // 最近一次记录
+                if (diaryEntries.length > 0) {
+                    const sortedEntries = [...diaryEntries].sort((a, b) => 
+                        new Date(b.date) - new Date(a.date)
+                    );
+                    const lastEntry = new Date(sortedEntries[0].date);
+                    lastEntryEl.textContent = `${lastEntry.getFullYear()}-${(lastEntry.getMonth() + 1).toString().padStart(2, '0')}-${lastEntry.getDate().toString().padStart(2, '0')}`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
